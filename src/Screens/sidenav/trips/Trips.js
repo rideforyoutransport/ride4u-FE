@@ -121,7 +121,7 @@ export default function Trips() {
       index: 6
     },
     {
-      name: "Created At ",
+      name: "Created On ",
       selector: (row) => row.created,
       sortable: true,
       index: 7

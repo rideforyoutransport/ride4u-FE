@@ -67,7 +67,7 @@ export default function Vendors() {
             index: 5
         },
         {
-            name: "Created At ",
+            name: "Created On ",
             selector: (row) => row.created,
             sortable: true,
             index: 7

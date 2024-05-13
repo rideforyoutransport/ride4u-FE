@@ -12,6 +12,7 @@ import Vendors from '../sidenav/vendors/Vendors';
 import Users from '../sidenav/users/Users';
 import TopBar from '../../Components/TopBar';
 import ChangePassword from '../sidenav/changePassword/ChangePassword';
+import Stops from '../sidenav/stops/Stops';
 
 
 
@@ -25,6 +26,7 @@ export default function Home() {
           <Route path="" element={<Trips />} />
           <Route path="addTrip" element={<AddTrip />} />
           <Route path="bookings" element={<Bookings />} />
+          <Route path="stops" element={<Stops />} />
           <Route path="drivers" element={<Drivers />} />
           <Route path="vehicles" element={<Vehicles />} />
           <Route path="vendors" element={<Vendors />} />

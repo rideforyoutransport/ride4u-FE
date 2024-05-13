@@ -6,7 +6,7 @@ import Autocomplete from "react-google-autocomplete";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import { TenMp } from "@mui/icons-material";
 import DateTimePicker from 'react-datetime-picker';
-import { get, post } from "../../Network/Config/Axios";
+import { get, post } from "../../../Network/Config/Axios";
 
 
 
