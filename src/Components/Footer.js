@@ -6,7 +6,7 @@ export default function Footer() {
     <p className="text-muted text-center text-md-left">
       Copyright © 2022-2023{" "}
       <a href="https://www.nobleui.com" target="_blank">
-        RIDE4UTRANSPORT
+        RIDEFORUTRANSPORT
       </a>
       . All rights reserved
     </p>
