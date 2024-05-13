@@ -3,9 +3,6 @@ import DataTable from "react-data-table-component";
 import {  useNavigate } from "react-router-dom";
 import axios from "axios";
 import {APIProvider, Map, Marker} from '@vis.gl/react-google-maps';
-
-
-import MapPicker from 'react-google-map-picker'
 import Autocomplete from "react-google-autocomplete";
 
 
@@ -236,18 +233,7 @@ export default function IndustryMaster() {
             
 
        
-   
-            
-            <MapPicker defaultLocation={defaultLocation}
-              zoom={zoom}
-              mapTypeId="satellite"
-              style={{height:'700px'}}
-              onChangeLocation={handleChangeLocation} 
-              onChangeZoom={handleChangeZoom}
-              apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
-              circleOptions ={{clickable:true}}
-              />
-
+  
               <Autocomplete
               apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
               onPlaceSelected={(place) => {

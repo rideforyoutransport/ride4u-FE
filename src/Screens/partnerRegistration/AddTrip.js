@@ -6,7 +6,6 @@ import Autocomplete from "react-google-autocomplete";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import { TenMp } from "@mui/icons-material";
 import { options } from "../dashboard/Dashboard";
-import DateTimePicker from 'react-datetime-picker';
 
 
 
@@ -384,7 +383,7 @@ export default function AddTrip() {
                 console.log(formData);
                 var config = {
                     method: "post",
-                    url: "http://127.0.0.1:3003/admin/vendor/add",
+                    url: "http://127.0.0.1:3003/admin/trips/add",
                     headers: {
                         "Content-Type": "application/json",
                         'Authorization': 'Bearer ' + sessionStorage.getItem('access_token'),
@@ -645,8 +644,6 @@ export default function AddTrip() {
                                 onChange={(e) => setContactPersonNumber(e.target.value)}
                             />
                         </div>
-
-                        <DateTimePicker />
                                  
                                     <div className="col-md-6 my-3">
                                         <label>Contact Person Number</label>
@@ -658,150 +655,10 @@ export default function AddTrip() {
                                             value={contactPersonNumber}
                                             onChange={(e) => setContactPersonNumber(e.target.value)}
                                         />
-                                    </div>
-                                    <div className="col-md-6 mt-3"></div>
-                                    <div className="col-md-6 mt-3">
-                                        <label>Head Office Address </label>
-                                        <textarea
-                                            id="maxlength-textarea"
-                                            className="form-control"
-                                            maxLength="100"
-                                            rows="4"
-                                            value={companyAddress.homeAddress}
-                                            placeholder="This textarea has a limit of 100 chars."
-                                            onChange={(e) =>
-                                                handleComapnyAddressChange(e, "homeAddress")
-                                            }
-                                        />
-                                    </div>
-                                    <div className="col-md-6 mt-3">
-                                        <label>Landmark </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="landmark"
-                                            type="text"
-                                            value={companyAddress.landMark}
-                                            onChange={(e) =>
-                                                handleComapnyAddressChange(e, "landMark")
-                                            }
-                                        />
-                                    </div>
+                                    </div>  
                                 </div>
-                                <div className="form-group row">
-                                    <div className="col-md-6 my-2 ">
-                                        <label>State </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="landmark"
-                                            type="text"
-                                            value={companyAddress.state}
-                                            onChange={(e) => handleComapnyAddressChange(e, "state")}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-2 ">
-                                        <label>City </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="city"
-                                            type="text"
-                                            value={companyAddress.city}
-                                            onChange={(e) => handleComapnyAddressChange(e, "city")}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-2 ">
-                                        <label>Country </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="landmark"
-                                            type="text"
-                                            value={companyAddress.country}
-                                            onChange={(e) => handleComapnyAddressChange(e, "country")}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-2 ">
-                                        <label>District </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="landmark"
-                                            type="text"
-                                            value={companyAddress.district}
-                                            onChange={(e) =>
-                                                handleComapnyAddressChange(e, "district")
-                                            }
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-2 ">
-                                        <label>Pincode </label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="pincode"
-                                            type="text"
-                                            value={companyAddress.pincode}
-                                            onChange={(e) => handleComapnyAddressChange(e, "pincode")}
-                                        />
-                                    </div>
-                                </div>
-                                <label className="text-xl text-uppercase">Social Media </label>
-
-                                <div className="form-group row">
-                                    <div className="col-md-11 my-2">
-                                        <label>Facebook </label>
-
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="fb"
-                                            type="text"
-                                            value={companySocialMedia.facebook}
-                                            onChange={(e) => handleCompanySocialChange(e, "facebook")}
-                                        />
-                                    </div>
-                                    <div className="col-md-11 my-2">
-                                        <label>Instagram </label>
-
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="ig"
-                                            type="text"
-                                            value={companySocialMedia.instagram}
-                                            onChange={(e) =>
-                                                handleCompanySocialChange(e, "instagram")
-                                            }
-                                        />
-                                    </div>
-                                    <div className="col-md-11 my-2">
-                                        <label>Twitter </label>
-
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="tw"
-                                            type="text"
-                                            value={companySocialMedia.twitter}
-                                            onChange={(e) => handleCompanySocialChange(e, "twitter")}
-                                        />
-                                    </div>
-                                    <div className="col-md-11 my-2">
-                                        <label>Youtube </label>
-
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="yt"
-                                            type="text"
-                                            value={companySocialMedia.youtube}
-                                            onChange={(e) => handleCompanySocialChange(e, "youtube")}
-                                        />
-                                    </div>
-                                </div>
-
+                            
+                             
                                 <div className="form-group row my-2">
                                     <div className="col-md-6 my-1">
                                         <label>Company URL</label>
@@ -950,135 +807,7 @@ export default function AddTrip() {
                                         )}
                                     </div>
                                 </div>
-                                {/* 
-                <div className="row">
-                  <div className="col-md-12 my-3">
-                    <div>
-                      <label className="text-capitalize font-weight-bold">
-                        {" "}
-                        Select Programs
-                      </label>
-                    </div>
-
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={"SupplyBeam"}
-                        checked={
-                          productsAvailing["SupplyBeam"] ? "checked" : ""
-                        }
-                        onChange={(e) =>
-                          handleProgramSelection(e, "SupplyBeam")
-                        }
-                      />{" "}
-                      <span className="px-2 mx-2">SupplyBeam</span>
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={"ScanAndWin"}
-                        checked={
-                          productsAvailing["ScanAndWin"] ? "checked" : ""
-                        }
-                        onChange={(e) =>
-                          handleProgramSelection(e, "ScanAndWin")
-                        }
-                      />{" "}
-                      <span className="px-2 mx-2">Scan and Win</span>
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={productsAvailing["Rewardify"] ? "checked" : ""}
-                        value={"Rewardify"}
-                        onChange={(e) => handleProgramSelection(e, "Rewardify")}
-                      />{" "}
-                      <span className="px-2 mx-2">Rewardify</span>
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={"Genuinity"}
-                        checked={productsAvailing["Genuinity"] ? "checked" : ""}
-                        onChange={(e) => handleProgramSelection(e, "Genuinity")}
-                      />{" "}
-                      <span className="px-2 mx-2">GenuineMark</span>
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={"DWAN"}
-                        checked={productsAvailing["DWAN"] ? "checked" : ""}
-                        onChange={(e) => handleProgramSelection(e, "DWAN")}
-                      />{" "}
-                      <span className="px-2 mx-2">DWAN</span>
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={"HybridOcean"}
-                        checked={
-                          productsAvailing["HybridOcean"] ? "checked" : ""
-                        }
-                        onChange={(e) =>
-                          handleProgramSelection(e, "HybridOcean")
-                        }
-                      />{" "}
-                      <span className="px-2 mx-2">HybridOcean</span>
-                    </label>
-                  </div>
-                </div>
-
-               User types  
-
-                <div className="row">
-                  <div className="col-md-12 my-3">
-                    <div>
-                      <label className="text-capitalize font-weight-bold">
-                        {" "}
-                        Select Users
-                      </label>
-                    </div>
-                    {Object.keys(userTypes).map((key) => (
-                      <label>
-                        <input
-                          type="checkbox"
-                          value={key}
-                          checked={userTypes[key] ? "checked" : ""}
-                          onChange={(e) => handleUserTypeSelection(e, key)}
-                        />{" "}
-                        <span className="px-2 mx-2">{key}</span>
-                      </label>
-                    ))}
-
-                    <label>
-                      <input
-                        type="text"
-                        className="border p-1"
-                        placeholder="Add new UserType"
-                        value={newUserValue}
-                        onChange={(e) => setNewUserValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.keyCode == 13) {
-                            console.log(newUserValue);
-                            let oldUserTypes = { ...userTypes };
-                            oldUserTypes[newUserValue] = false;
-                            setUsersTypes(oldUserTypes);
-                            console.log(userTypes);
-                            setNewUserValue("");
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                 */}
-
-
-
-
-
+                                
 
                                 <div className="row">
                                     <div className="col-md-3"></div>
