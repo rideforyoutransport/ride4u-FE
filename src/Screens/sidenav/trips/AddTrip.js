@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import validator from "validator";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ import Stack from '@mui/material/Stack';
 
 
 
-  
+
 
 
 
@@ -54,7 +54,7 @@ export default function AddTrip() {
         "totalSeats": 0,
         "totalSeatsLeft": 0
     }
- 
+
 
 
 
@@ -100,10 +100,7 @@ export default function AddTrip() {
     const [to, setTo] = useState({});
     const [stops, setStops] = useState([]);
     const [tripDetails, setTripDetails] = useState(addTripObj);
-    const [stopNames, setStopNames] = useState(['SOmeName']);
-
-    const [placeOnClick, setPlaceOnClick] = useState({});
-
+    const [allPossibleFares, setAllPossibleFares] = useState([])
 
 
 
@@ -147,10 +144,36 @@ export default function AddTrip() {
                 })
             }
         })
-
     }, [])
 
+    useEffect(() => {
 
+        let tempFareObj = []
+        for (let index = 0; index < stops.length; index++) {
+            for (let j = index + 1; j < stops.length; j++) {
+                let element = {
+                    "from": stops[index].place_name,
+                    "to": stops[j].place_name,
+                    "fare": 0
+                }
+                tempFareObj.push(element);
+            }
+        }
+        setAllPossibleFares(tempFareObj);
+        console.log(allPossibleFares)
+
+    }, [stops])
+
+
+
+    const setFare =(event,idx)=>{
+        console.log(event.target.value, idx )
+        let allPossibleFaresTemp =[...allPossibleFares];
+        console.log({allPossibleFaresTemp})
+        allPossibleFaresTemp[idx].fare=event.target.value;
+        setAllPossibleFares(allPossibleFaresTemp);
+        console.log({allPossibleFares});
+    }
     const removeFromStops = (e, key) => {
         console.log(key);
         let oldValues = [...stops];
@@ -158,49 +181,18 @@ export default function AddTrip() {
         setStops(oldValues);
     };
 
- 
-    useEffect(() => { console.log(stops) }, [stops])
 
+    const handleLocationSelected = useCallback((place) => {
+        if (place != null) {
+            let lng = place.geometry.location.lng();
+            let lat = place.geometry.location.lat();
+            let place_id = place.place_id;
+            let place_name = place.formatted_address;
 
-
-    const handleLocationSelected =  (place) => {
-        let lng = place.geometry.location.lng();
-        let lat = place.geometry.location.lat();
-        let place_id = place.place_id;
-        let place_name = place.formatted_address;
-
-        let stopsObj = { lat, lng, place_id , place_name};
-
-         handleAddingStops(stopsObj);
-
-
-        // let oldStopNames = [...stopNames];
-        // oldStopNames.push(place.formatted_address.toString());
-        // // console.log(oldStops);
-        // setStopNames(oldStopNames);
-        // //   setNewUserValue("");
-
-    }
-    const handleAddingStops=async (stopsObj)=>{
-    
-        
-        let tempStops =[...stops]
-        tempStops.push(stopsObj);
-        
-         setStops(tempStops);
-
-         console.log(stopsObj,"this is the stopsObj")
-        let newStopName = stopsObj.place_name;
-        let oldStopNames = [...stopNames];
-        oldStopNames.push(newStopName);
-         setStopNames(oldStopNames);
-         console.log(stopNames);
-
-
-        // console.log("this is from names stops ", stops, stopNames);
-
-    }
-
+            let stopsObj = { lat, lng, place_id, place_name };
+            setStops((prevStop) => [...prevStop, stopsObj]);
+        }
+    }, [stops]);
 
 
     const handleAddTripChange = (e, target) => {
@@ -292,7 +284,7 @@ export default function AddTrip() {
         // setCompanyPassword("");
         // setCompanyRePassword("");
         // setCompanyGstin("");
-    
+
         // setContactPerson("");
         // setContactPersonNumber("");
         // setCompanyMobile("");
@@ -397,7 +389,7 @@ export default function AddTrip() {
                                                 let lat = place.geometry.location.lat();
                                                 let place_id = place.place_id;
                                                 let place_name = place.formatted_address;
-                                                let from = { lat, lng, place_id,place_name };
+                                                let from = { lat, lng, place_id, place_name };
                                                 setFrom(from);
                                                 console.log(from);
                                             }}
@@ -421,7 +413,7 @@ export default function AddTrip() {
                                                 var lat = place.geometry.location.lat();
                                                 var place_id = place.place_id;
                                                 let place_name = place.formatted_address;
-                                                let to = { lat, lng, place_id,place_name };
+                                                let to = { lat, lng, place_id, place_name };
                                                 setTo(to);
                                                 console.log(to);
 
@@ -437,14 +429,14 @@ export default function AddTrip() {
                                                 Stops
                                             </label>
                                         </div>
-                                        {stopNames.map((key, idx) => (
+                                        {stops.map((key, idx) => (
                                             <label key={idx}>
                                                 <span
                                                     className="px-2 mx-2 btn btn-outline-danger"
                                                     onClick={(e) => removeFromStops(e, key)}
 
                                                 >
-                                                    {key}
+                                                    {key.place_name}
                                                 </span>
                                             </label>
                                         ))}
@@ -454,8 +446,8 @@ export default function AddTrip() {
                                                 apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                                 className="form-control"
                                                 type="text"
-                                                onPlaceSelected={(place) => 
-                                                 {
+
+                                                onPlaceSelected={(place) => {
                                                     handleLocationSelected(place);
                                                 }}
                                             />
@@ -483,7 +475,7 @@ export default function AddTrip() {
                                             className="js-example-basic-single w-100"
                                             onChange={handleVehicleChange}>
                                             <option value={''}>Select Vehicle</option>
-                                            {vehicles.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
+                                            {vehicles?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
                                     </div>
                                     <div className="col-md-6 my-2">
@@ -513,7 +505,7 @@ export default function AddTrip() {
                                             <option value={'false'}>True</option>
                                         </select>
                                     </div>
-                                    
+
                                     <div className="col-md-6 my-3">
                                         <label>Booking Amount</label>
                                         <input
@@ -521,24 +513,104 @@ export default function AddTrip() {
                                             className="form-control"
                                             name="m_no"
                                             type="number"
-                                            value={contactPersonNumber}
-                                            onChange={(e) => setContactPersonNumber(e.target.value)}
+                                            value={bookingMinimumAmount}
+                                            onChange={(e) => setBookingMinimumAmount(e.target.value)}
                                         />
                                     </div>
                                     <div className="col-md-6 my-3">
-                                    <label>Trip Date</label>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer
-                                      components={['DateTimePicker']}>
-                                      <DemoItem>
-                                        <DateTimePicker
-                                        onChange={(e)=>setTripDate(e.$d.toISOString())}
+                                        <label>Cancellation Amount</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={cancelationCharges}
+                                            onChange={(e) => setCancelationCharges(e.target.value)}
                                         />
-                                      </DemoItem>
-                                    </DemoContainer>
-                                  </LocalizationProvider>
-                                  
-                                </div>
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Total Trip Amount</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={totalTripAmount}
+                                            onChange={(e) => settotalTripAmount(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="string"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-12 my-12">
+
+                                        <label>Fares</label>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">From</th>
+                                                    <th scope="col">To</th>
+                                                    <th scope="col">Fare</th>
+                                                </tr>
+                                            </thead>
+                                            {allPossibleFares?.map((key, idx) => (
+
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row" key={idx}>{idx + 1}</th>
+                                                        <td>{key.from}</td>
+                                                        <td>{key.to}</td>
+                                                        <input
+                                           
+                                            className="form-control"
+                                            type="number"
+                                            value={key.fare}
+                                            onChange={(e) => setFare(e,idx)}
+                                        />
+                                                    </tr>
+
+                                                </tbody>
+                                            ))}
+                                        </table>
+                                        
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Date</label>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer
+                                                components={['DateTimePicker']}>
+                                                <DemoItem>
+                                                    <DateTimePicker
+                                                        onChange={(e) => setTripDate(e.$d.toISOString())}
+                                                    />
+                                                </DemoItem>
+                                            </DemoContainer>
+                                        </LocalizationProvider>
+
+                                    </div>
 
                                 </div>
                                 <div className="row">
