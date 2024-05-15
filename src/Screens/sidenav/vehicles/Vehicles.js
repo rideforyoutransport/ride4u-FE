@@ -31,7 +31,7 @@ export default function Vehicles() {
   }, [])
 
   const handleButtonEditClick = (r) => {
-    navigate('/editVendor', { state: r });
+    navigate('/addVehicle', { state: r });
   }
 
   const handleChange = useCallback((state) => {
@@ -58,12 +58,6 @@ export default function Vehicles() {
       selector: (row) => row.totalSeats,
       sortable: true,
       index: 3
-    },
-    {
-        name: "Vehicle Type",
-        selector: (row) => row.carType,
-        sortable: true,
-        index: 3
     },
     {
       name: "Total Trips",
@@ -102,7 +96,7 @@ export default function Vehicles() {
               actions={<button
                 type="button"
                 className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                onClick={() => navigate("/addTrip")}
+                onClick={() => navigate("/addVehicle")}
               >
                 Add Vehicle
               </button>}

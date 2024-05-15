@@ -31,7 +31,7 @@ export default function Drivers() {
   }, [])
 
   const handleButtonEditClick = (r) => {
-    navigate('/editVendor', { state: r });
+    navigate('/addDriver', { state: r });
   }
 
   const handleChange = useCallback((state) => {
@@ -103,7 +103,7 @@ export default function Drivers() {
               actions={<button
                 type="button"
                 className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                onClick={() => navigate("/addTrip")}
+                onClick={() => navigate("/addDriver")}
               >
                 Add Driver
               </button>}

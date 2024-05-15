@@ -130,14 +130,14 @@ export default function Bookings() {
       sortable: true,
       index: 11
     },
-    {
-      name: "Action",
-      cell: (r) => <button className="btn btn-outline-success btn-sm" onClick={() => handleButtonEditClick(r)}>Edit</button>,
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      index: 14
-    }
+    // {
+    //   name: "Action",
+    //   cell: (r) => <button className="btn btn-outline-success btn-sm" onClick={() => handleButtonEditClick(r)}>Edit</button>,
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    //   index: 14
+    // }
   ];
   return (
     <>
@@ -146,13 +146,13 @@ export default function Bookings() {
           <div className="col-12 col-xl-12">
 
             <DataTable
-              actions={<button
-                type="button"
-                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                onClick={() => navigate("/addTrip")}
-              >
-                Add Booking
-              </button>}
+              // actions={<button
+              //   type="button"
+              //   className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+              //   onClick={() => navigate("/addTrip")}
+              // >
+              //   Add Booking
+              // </button>}
               title="Bookings"
               data={tableDataItems}
               columns={columns}

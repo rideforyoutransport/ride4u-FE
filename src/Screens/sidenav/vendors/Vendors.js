@@ -31,7 +31,7 @@ export default function Vendors() {
     }, [])
 
     const handleButtonEditClick = (r) => {
-        navigate('/editVendor', { state: r });
+        navigate('/addVendor', { state: r });
     }
 
     const handleChange = useCallback((state) => {
@@ -91,7 +91,7 @@ export default function Vendors() {
                   actions={<button
                     type="button"
                     className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                    onClick={() => navigate("/addTrip")}
+                    onClick={() => navigate("/addVendor")}
                   >
                     Add Vendor
                   </button>}

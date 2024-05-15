@@ -31,7 +31,7 @@ export default function Users() {
     }, [])
 
     const handleButtonEditClick = (r) => {
-        navigate('/editVendor', { state: r });
+        navigate('/addUser', { state: r });
     }
 
     const handleChange = useCallback((state) => {
@@ -97,7 +97,7 @@ export default function Users() {
                   actions={<button
                     type="button"
                     className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                    onClick={() => navigate("/addTrip")}
+                    onClick={() => navigate("/addUser")}
                   >
                     Add User
                   </button>}
