@@ -64,13 +64,13 @@ export default function Vendors() {
             name: "Phone Number",
             selector: (row) => row.phoneNumber,
             sortable: true,
-            index: 5
+            index: 3
         },
         {
             name: "Created On ",
             selector: (row) => row.created,
             sortable: true,
-            index: 7
+            index: 4
         },
         {
             name: "Action",
@@ -78,7 +78,7 @@ export default function Vendors() {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            index: 14
+            index: 5
         }
     ];
     return (

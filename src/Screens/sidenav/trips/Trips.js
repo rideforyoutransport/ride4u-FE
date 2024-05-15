@@ -112,31 +112,31 @@ export default function Trips() {
       name: "Origin",
       selector: (row) => row.from.name,
       sortable: true,
-      index: 5
+      index: 4
     },
     {
       name: "Destination",
       selector: (row) => row.to.name,
       sortable: true,
-      index: 6
+      index: 5
     },
     {
       name: "Created On ",
       selector: (row) => row.created,
       sortable: true,
-      index: 7
+      index: 6
     },
     {
       name: "Driver",
       selector: (row) => row.driver.name,
       sortable: true,
-      index: 8
+      index: 7
     },
     {
       name: "Refreshments",
       selector: (row) => row.refreshments.toString(),
       sortable: true,
-      index: 9
+      index: 8
     },
     {
       name: "Luggage Options",
@@ -159,13 +159,13 @@ export default function Trips() {
       name: "Vehicle",
       selector: (row) => row.vehicle.name,
       sortable: true,
-      index: 9
+      index: 10
     },
     {
       name: "Stops",
       selector: (row) => row.stops.toString(),
       sortable: true,
-      index: 9
+      index: 11
     },
 
 
@@ -173,13 +173,13 @@ export default function Trips() {
       name: "Total Seats ",
       selector: (row) => row.totalSeats,
       sortable: true,
-      index: 10
+      index: 12
     },
     {
       name: "Total Trip Amount",
       selector: (row) => row.totalTripAmount,
       sortable: true,
-      index: 11
+      index: 13
     },
     // {
     //   name: "Panel Status",

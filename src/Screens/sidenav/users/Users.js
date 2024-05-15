@@ -64,19 +64,19 @@ export default function Users() {
             name: "Total Trips",
             selector: (row) => row.totalTrips,
             sortable: true,
-            index: 4
+            index: 3
         },
         {
             name: "Phone Number",
             selector: (row) => row.phoneNumber,
             sortable: true,
-            index: 5
+            index: 4
         },
         {
             name: "Created On ",
             selector: (row) => row.created,
             sortable: true,
-            index: 7
+            index: 5
         },
         {
             name: "Action",
@@ -84,7 +84,7 @@ export default function Users() {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            index: 14
+            index: 6
         }
     ];
     return (

@@ -80,19 +80,19 @@ export default function Bookings() {
       name: "Booking Date",
       selector: (row) => row.created,
       sortable: true,
-      index: 7
+      index: 3
     },
     {
         name: "Luggage Opted",
         selector: (row) => row.luggageOpted,
         sortable: true,
-        index: 9
+        index: 4
     },
     {
       name: "Refreshments Opted",
       selector: (row) => row.refreshmentsOpted.toString(),
       sortable: true,
-      index: 9
+      index: 5
     },
     // {
     //   name: "PromoCodes",
@@ -104,31 +104,31 @@ export default function Bookings() {
       name: "Vehicle",
       selector: (row) => row.vehicle.name,
       sortable: true,
-      index: 9
+      index: 6
     },
     {
       name: "Total Seats ",
       selector: (row) => row.totalSeatsBooked,
       sortable: true,
-      index: 10
+      index: 7
     },
     {
         name: "Paid Amount",
         selector: (row) => row.amountPaid,
         sortable: true,
-        index: 11
+        index: 8
     },
     {
         name: "Remaining Amount",
         selector: (row) => row.amountLeft,
         sortable: true,
-        index: 11
+        index: 9
     },
     {
       name: "Total Amount",
       selector: (row) => row.totalAmount,
       sortable: true,
-      index: 11
+      index: 10
     },
     // {
     //   name: "Action",

@@ -75,7 +75,7 @@ export default function Vehicles() {
       name: "Created On ",
       selector: (row) => row.created,
       sortable: true,
-      index: 7
+      index: 6
     },
     {
       name: "Action",
@@ -83,7 +83,7 @@ export default function Vehicles() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      index: 14
+      index: 7
     }
   ];
   return (
