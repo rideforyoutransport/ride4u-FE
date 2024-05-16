@@ -1,12 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import validator from "validator";
 import { useNavigate } from "react-router-dom";
 import Autocomplete from "react-google-autocomplete";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import { TenMp } from "@mui/icons-material";
-import DateTimePicker from 'react-datetime-picker';
 import { get, post } from "../../../Network/Config/Axios";
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { styled } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
+import Stack from '@mui/material/Stack';
+
+
+
 
 
 
@@ -43,78 +54,26 @@ export default function AddTrip() {
         "totalSeats": 0,
         "totalSeatsLeft": 0
     }
-    const companyAddressObj = {
-        homeAddress: "",
-        state: "",
-        country: "",
-        state: "",
-        district: "",
-        landMark: "",
-        city: "",
-        pincode: "",
-    };
-    const companySocialMediaObj = {
-        facebook: "",
-        youtube: "",
-        instagram: "",
-        twitter: "",
-    };
-
-    const productsAvailingObj = {
-        Genuinity: false,
-        DWAN: false,
-        ScanAndWin: false,
-        Rewardify: false,
-        SupplyBeam: false,
-        HybridOcean: false,
-    };
-    const userTypesObj = {
-        Customer: false,
-        Distributor: false,
-        Retailers: false,
-        "Channel Partner": false,
-        CEO: false,
-        WareHouse: false,
-        Vendor: false,
-    };
-    const partnerBusinessDetailsObj = {
-        Gstin: "",
-        Pan: "",
-        url: ""
-    };
 
 
 
 
-    const [comapnyName, setComapnyName] = useState("");
-    const [companyEmail, setCompanyEmail] = useState("");
-    const [companyPassword, setCompanyPassword] = useState("");
-    const [companyRePassword, setCompanyRePassword] = useState("");
+
     const [companyMobile, setCompanyMobile] = useState("");
     const [contactPerson, setContactPerson] = useState("");
     const [contactPersonNumber, setContactPersonNumber] = useState("");
-    const [companyAddress, setcompanyAddress] = useState(companyAddressObj);
-    const [companySocialMedia, setCompanySocialMedia] = useState(
-        companySocialMediaObj,
-    );
-    const [tripDetails, setTripDetails] = useState(addTripObj);
-    const [stops, setStops] = useState(['nsme']);
 
 
-    const [partnerBusinessDetails, setPartnerBusinessDetails] = useState(
-        partnerBusinessDetailsObj,
-    );
+
 
     const [picture, setPicture] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
-    const [companyIndustry, setCompanyIndustry] = useState(0);
     const [companyGstin, setCompanyGstin] = useState("");
     const [panelStatus, setPanelStatus] = useState(0);
     const [companyStatus, setCompanyStatus] = useState(0);
     const [companyUrl, setCompanyUrl] = useState("");
     const [qrType, setQrType] = useState(0);
     const [demoValue, setDemoValue] = useState(0);
-    const [productsAvailing, setproductsAvailing] = useState(productsAvailingObj);
 
     const [companyUserReqirements, setCompanyUserReqirements] = useState(0);
     const [vendorId, setVendorId] = useState(0);
@@ -135,6 +94,13 @@ export default function AddTrip() {
     const [cancelationCharges, setCancelationCharges] = useState(0);
     const [requestedTrip, setRequestedTrip] = useState(false);
     const [requestedUser, setRequestedUser] = useState({ 'name': '', 'id': '' });
+    const [tripDate, setTripDate] = useState('');
+    const [returnTrip, setReturnTrip] = useState(false);
+    const [from, setFrom] = useState({});
+    const [to, setTo] = useState({});
+    const [stops, setStops] = useState([]);
+    const [tripDetails, setTripDetails] = useState(addTripObj);
+    const [allPossibleFares, setAllPossibleFares] = useState([])
 
 
 
@@ -178,10 +144,36 @@ export default function AddTrip() {
                 })
             }
         })
-
     }, [])
 
+    useEffect(() => {
 
+        let tempFareObj = []
+        for (let index = 0; index < stops.length; index++) {
+            for (let j = index + 1; j < stops.length; j++) {
+                let element = {
+                    "from": stops[index].place_name,
+                    "to": stops[j].place_name,
+                    "fare": 0
+                }
+                tempFareObj.push(element);
+            }
+        }
+        setAllPossibleFares(tempFareObj);
+        console.log(allPossibleFares)
+
+    }, [stops])
+
+
+
+    const setFare =(event,idx)=>{
+        console.log(event.target.value, idx )
+        let allPossibleFaresTemp =[...allPossibleFares];
+        console.log({allPossibleFaresTemp})
+        allPossibleFaresTemp[idx].fare=event.target.value;
+        setAllPossibleFares(allPossibleFaresTemp);
+        console.log({allPossibleFares});
+    }
     const removeFromStops = (e, key) => {
         console.log(key);
         let oldValues = [...stops];
@@ -189,35 +181,20 @@ export default function AddTrip() {
         setStops(oldValues);
     };
 
-    const handleUsersRequirementChange = (e) => {
-        setCompanyUserReqirements(e.target.value);
-        console.log(companyUserReqirements);
-    };
+
+    const handleLocationSelected = useCallback((place) => {
+        if (place != null) {
+            let lng = place.geometry.location.lng();
+            let lat = place.geometry.location.lat();
+            let place_id = place.place_id;
+            let place_name = place.formatted_address;
+
+            let stopsObj = { lat, lng, place_id, place_name };
+            setStops((prevStop) => [...prevStop, stopsObj]);
+        }
+    }, [stops]);
 
 
-
-    const handleLocationSelected = (place) => {
-        var lng = place.geometry.location.lng();
-        var lat = place.geometry.location.lat();
-        var place_id = place.place_id;
-        var latlng = { lat, lng, place_id };
-        handleAddTripChange(latlng, 'from');
-        console.log(place.formatted_address);
-
-        let oldStops = [...stops];
-        oldStops.push(place.formatted_address.toString());
-        console.log(oldStops);
-        setStops(oldStops);
-        //   setNewUserValue("");
-
-    }
-
-
-    const handleComapnyAddressChange = (e, target) => {
-        let copiedValue = { ...companyAddress };
-        copiedValue[target] = e.target.value;
-        setcompanyAddress(copiedValue);
-    };
     const handleAddTripChange = (e, target) => {
         let copiedValue = { ...tripDetails };
         if (target == 'from' || target == 'to') {
@@ -228,77 +205,6 @@ export default function AddTrip() {
         setTripDetails(copiedValue);
     };
 
-    const handlePhoneChange = (event) => {
-        if (
-            !validator.isMobilePhone(event.target.value, ["en-IN"]) &&
-            event.target.value > 0
-        ) {
-            setCompanyMobileError("Phone no Invalid");
-        } else {
-            setCompanyMobileError(null);
-        }
-
-        setCompanyMobile(event.target.value);
-    };
-
-    const handleCompanySocialChange = (e, target) => {
-        let copiedValue = { ...companySocialMedia };
-        copiedValue[target] = e.target.value;
-        setCompanySocialMedia(copiedValue);
-    };
-
-    const handleEmailChange = (event) => {
-        console.log(event.target.value);
-        console.log(validator.isEmail(event.target.value));
-        if (
-            !validator.isEmail(event.target.value) &&
-            event.target.value.length > 0
-        ) {
-            setCompanyEmailError("Email is invalid");
-        } else {
-            setCompanyEmailError(null);
-        }
-        setCompanyEmail(event.target.value);
-    };
-
-    const handlePasswordChange = (event, type) => {
-        if (
-            event.target.value.length > 0 &&
-            !validator.isStrongPassword(event.target.value, {
-                minLength: 8,
-                minLowercase: 1,
-                minUppercase: 1,
-                minNumbers: 1,
-                minSymbols: 1,
-            })
-        ) {
-            if (event.target.value !== companyPassword && type == 1) {
-                setPasswordReError("Password Not Same");
-            } else if (type == 1)
-                setPasswordReError(
-                    "Password is not strong , must include a number , symbol , uppercase and lowercase ",
-                );
-            else
-                setPasswordError(
-                    "Password is not strong , must include a number , symbol , uppercase and lowercase ",
-                );
-        } else {
-            if (type == 1) setPasswordReError(null);
-            else setPasswordError(null);
-        }
-
-        if (type == 1) setCompanyRePassword(event.target.value);
-        else setCompanyPassword(event.target.value);
-    };
-
-    const handledemoStatus = (e) => {
-        setDemoValue(e.target.value);
-        console.log(demoValue);
-    };
-    const handleCompanyIndustryChange = (e) => {
-        setCompanyIndustry(e.target.value);
-    };
-
     const addNewVendor = (e) => {
         e.preventDefault();
         if (
@@ -306,25 +212,25 @@ export default function AddTrip() {
             companyMobileError == null &&
             passwordError == null &&
             passwordReError == null &&
-            companyEmail.length > 0 &&
-            comapnyName.length > 0 &&
+            // companyEmail.length > 0 &&
+            // comapnyName.length > 0 &&
             companyGstin.length > 0
         ) {
             if (document.getElementById("file").files[0]) {
                 const formData = new FormData();
-                formData.append("pPassword", companyPassword);
+                // formData.append("pPassword", companyPassword);
                 formData.append("file", document.getElementById("file").files[0]);
-                formData.append("pName", comapnyName);
-                formData.append("pSocials", JSON.stringify(companySocialMedia));
-                formData.append("pEmail", companyEmail);
+                // formData.append("pName", comapnyName);
+                // formData.append("pSocials", JSON.stringify(companySocialMedia));
+                // formData.append("pEmail", companyEmail);
                 formData.append("pPhone", companyMobile);
                 formData.append("pWebsite", companyUrl);
-                formData.append("pAddress", JSON.stringify(companyAddress));
-                formData.append("pGstin", companyGstin);
-                formData.append("deleted", panelStatus);
-                formData.append("deleted", companyStatus);
-                formData.append("pQrType", qrType);
-                formData.append("pContactPerson", contactPerson);
+                // formData.append("pAddress", JSON.stringify(companyAddress));
+                // formData.append("pGstin", companyGstin);
+                // formData.append("deleted", panelStatus);
+                // formData.append("deleted", companyStatus);
+                // formData.append("pQrType", qrType);
+                // formData.append("pContactPerson", contactPerson);
                 formData.append("pPanelStatus", true);
                 //   formData.append("industry", companyIndustry);
                 formData.append("pContactPersonNumber", contactPersonNumber);
@@ -373,25 +279,22 @@ export default function AddTrip() {
     };
 
     const resetValues = () => {
-        setComapnyName("");
-        setCompanyEmail("");
-        setCompanyPassword("");
-        setCompanyRePassword("");
-        setCompanyGstin("");
-        setcompanyAddress(companyAddressObj);
-        setCompanySocialMedia(companySocialMediaObj);
-        setContactPerson("");
-        setContactPersonNumber("");
-        setCompanyIndustry(0);
-        setCompanyMobile("");
-        setCompanyUrl("");
-        setPanelStatus(0);
-        setDemoValue(0);
-        setPicture(null);
-        setThumbnail(null);
-        setproductsAvailing(productsAvailingObj);
-        setCompanyStatus(0);
-        setCompanyUserReqirements(0);
+        // setComapnyName("");
+        // setCompanyEmail("");
+        // setCompanyPassword("");
+        // setCompanyRePassword("");
+        // setCompanyGstin("");
+
+        // setContactPerson("");
+        // setContactPersonNumber("");
+        // setCompanyMobile("");
+        // setCompanyUrl("");
+        // setPanelStatus(0);
+        // setDemoValue(0);
+        // setPicture(null);
+        // setThumbnail(null);
+        // setCompanyStatus(0);
+        // setCompanyUserReqirements(0);
     };
 
     const handleChange = (event) => {
@@ -439,6 +342,10 @@ export default function AddTrip() {
         setRefreshments(event.target.value);
     };
 
+    const handleReturnTrip = async (event) => {
+        event.preventDefault();
+        setReturnTrip(event.target.value);
+    };
 
     return (
         <div className="page-content">
@@ -446,7 +353,7 @@ export default function AddTrip() {
                 <div className="col-lg-12 grid-margin stretch-card">
                     <div className="card">
                         <div className="card-body">
-                            <h4 className="card-title">Add New Vendor</h4>
+                            <h4 className="card-title">Add New Trip</h4>
                             <div className="cmxform">
                                 <div className="form-group row">
 
@@ -478,13 +385,13 @@ export default function AddTrip() {
 
                                             onPlaceSelected={(place) => {
 
-                                                var lng = place.geometry.location.lng();
-                                                var lat = place.geometry.location.lat();
-                                                var place_id = place.place_id;
-                                                var latlng = { lat, lng, place_id };
-                                                console.log("location is this ", latlng);
-                                                handleAddTripChange(latlng, 'from')
-
+                                                let lng = place.geometry.location.lng();
+                                                let lat = place.geometry.location.lat();
+                                                let place_id = place.place_id;
+                                                let place_name = place.formatted_address;
+                                                let from = { lat, lng, place_id, place_name };
+                                                setFrom(from);
+                                                console.log(from);
                                             }}
                                         />
 
@@ -500,14 +407,15 @@ export default function AddTrip() {
                                             apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                             className="form-control"
                                             type="text"
-                                            onChange={(e) => console.log(e)}
                                             onPlaceSelected={(place) => {
 
                                                 var lng = place.geometry.location.lng();
                                                 var lat = place.geometry.location.lat();
                                                 var place_id = place.place_id;
-                                                var latlng = { lat, lng, place_id };
-                                                handleAddTripChange(latlng, 'from')
+                                                let place_name = place.formatted_address;
+                                                let to = { lat, lng, place_id, place_name };
+                                                setTo(to);
+                                                console.log(to);
 
                                             }}
                                         />
@@ -521,13 +429,14 @@ export default function AddTrip() {
                                                 Stops
                                             </label>
                                         </div>
-                                        {stops.map((key) => (
-                                            <label key={key}>
+                                        {stops.map((key, idx) => (
+                                            <label key={idx}>
                                                 <span
                                                     className="px-2 mx-2 btn btn-outline-danger"
                                                     onClick={(e) => removeFromStops(e, key)}
+
                                                 >
-                                                    {key}
+                                                    {key.place_name}
                                                 </span>
                                             </label>
                                         ))}
@@ -537,9 +446,9 @@ export default function AddTrip() {
                                                 apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                                 className="form-control"
                                                 type="text"
+
                                                 onPlaceSelected={(place) => {
                                                     handleLocationSelected(place);
-                                                    console.log(place);
                                                 }}
                                             />
 
@@ -566,7 +475,7 @@ export default function AddTrip() {
                                             className="js-example-basic-single w-100"
                                             onChange={handleVehicleChange}>
                                             <option value={''}>Select Vehicle</option>
-                                            {vehicles.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
+                                            {vehicles?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
                                     </div>
                                     <div className="col-md-6 my-2">
@@ -587,6 +496,16 @@ export default function AddTrip() {
                                             <option value={'false'}>True</option>
                                         </select>
                                     </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Return Trip</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleReturnTrip}>
+                                            <option value={'true'}>False</option>
+                                            <option value={'false'}>True</option>
+                                        </select>
+                                    </div>
+
                                     <div className="col-md-6 my-3">
                                         <label>Booking Amount</label>
                                         <input
@@ -594,12 +513,105 @@ export default function AddTrip() {
                                             className="form-control"
                                             name="m_no"
                                             type="number"
-                                            value={contactPersonNumber}
-                                            onChange={(e) => setContactPersonNumber(e.target.value)}
+                                            value={bookingMinimumAmount}
+                                            onChange={(e) => setBookingMinimumAmount(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-3">
+                                        <label>Cancellation Amount</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={cancelationCharges}
+                                            onChange={(e) => setCancelationCharges(e.target.value)}
                                         />
                                     </div>
 
-                                    <DateTimePicker />
+                                    <div className="col-md-6 my-3">
+                                        <label>Total Trip Amount</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={totalTripAmount}
+                                            onChange={(e) => settotalTripAmount(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="string"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-12 my-12">
+
+                                        <label>Fares</label>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">From</th>
+                                                    <th scope="col">To</th>
+                                                    <th scope="col">Fare</th>
+                                                </tr>
+                                            </thead>
+                                            {allPossibleFares?.map((key, idx) => (
+
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row" key={idx}>{idx + 1}</th>
+                                                        <td>{key.from}</td>
+                                                        <td>{key.to}</td>
+                                                        <input
+                                           
+                                            className="form-control"
+                                            type="number"
+                                            value={key.fare}
+                                            onChange={(e) => setFare(e,idx)}
+                                        />
+                                                    </tr>
+
+                                                </tbody>
+                                            ))}
+                                        </table>
+                                        
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Date</label>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer
+                                                components={['DateTimePicker']}>
+                                                <DemoItem>
+                                                    <DateTimePicker
+                                                        onChange={(e) => setTripDate(e.$d.toISOString())}
+                                                    />
+                                                </DemoItem>
+                                            </DemoContainer>
+                                        </LocalizationProvider>
+
+                                    </div>
+
                                 </div>
                                 <div className="row">
                                     <div className="col-md-3"></div>
