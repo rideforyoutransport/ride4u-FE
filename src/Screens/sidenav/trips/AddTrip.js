@@ -170,13 +170,13 @@ export default function AddTrip() {
 
 
 
-    const setFare =(event,idx)=>{
-        console.log(event.target.value, idx )
-        let allPossibleFaresTemp =[...allPossibleFares];
-        console.log({allPossibleFaresTemp})
-        allPossibleFaresTemp[idx].fare=event.target.value;
+    const setFare = (event, idx) => {
+        console.log(event.target.value, idx)
+        let allPossibleFaresTemp = [...allPossibleFares];
+        console.log({ allPossibleFaresTemp })
+        allPossibleFaresTemp[idx].fare = event.target.value;
         setAllPossibleFares(allPossibleFaresTemp);
-        console.log({allPossibleFares});
+        console.log({ allPossibleFares });
     }
     const removeFromStops = (e, key) => {
         console.log(key);
@@ -283,7 +283,7 @@ export default function AddTrip() {
     };
 
     const resetValues = () => {
-        // setComapnyName("");
+        // setTripDate("");
         // setCompanyEmail("");
         // setCompanyPassword("");
         // setCompanyRePassword("");
@@ -374,14 +374,6 @@ export default function AddTrip() {
 
                                     <div className="col-md-6 my-3">
                                         <label>Origin </label>
-                                        {/* <input
-                                    id="m_no"
-                                    className="form-control"
-                                    name="m_no"
-                                    type="text"
-                                    value={tripDetails.from}
-                                    onChange={(e) => handleAddTripChange(e, "from")}
-    />*/}
                                         <Autocomplete
                                             apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                             className="form-control"
@@ -459,7 +451,7 @@ export default function AddTrip() {
                                         </label>
                                     </div>
                                 </div>
-                            
+
                                 <div className="form-group row">
                                     <div className="col-md-6 my-3">
                                         <label>Trip Description</label>
@@ -554,18 +546,18 @@ export default function AddTrip() {
                                                         <td>{key.from}</td>
                                                         <td>{key.to}</td>
                                                         <input
-                                           
-                                            className="form-control"
-                                            type="number"
-                                            value={key.fare}
-                                            onChange={(e) => setFare(e,idx)}
-                                        />
+
+                                                            className="form-control"
+                                                            type="number"
+                                                            value={key.fare}
+                                                            onChange={(e) => setFare(e, idx)}
+                                                        />
                                                     </tr>
 
                                                 </tbody>
                                             ))}
                                         </table>
-                                        
+
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -595,7 +587,236 @@ export default function AddTrip() {
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            </div>{returnTrip?<></>:                            <div className="cmxform">
+                                <div className="form-group row">
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Vendor</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            value={tripDetails.vendor}
+                                            onChange={(e) => handleAddTripChange(e.target.value, "vendor")}
+                                        >{vendors.map((key) => <option value={key.id}>{key.name}</option>)}
+                                        </select>
+
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Origin </label>
+                                        <Autocomplete
+                                            apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
+                                            className="form-control"
+                                            type="text"
+
+                                            onPlaceSelected={(place) => {
+
+                                                let lng = place.geometry.location.lng();
+                                                let lat = place.geometry.location.lat();
+                                                let place_id = place.place_id;
+                                                let place_name = place.formatted_address;
+                                                let from = { lat, lng, place_id, place_name };
+                                                setFrom(from);
+                                                console.log(from);
+                                            }}
+                                        />
+
+
+
+                                    </div>
+
+                                    <div className="col-md-6 my-2">
+
+                                        <label>Destination </label>
+
+                                        <Autocomplete
+                                            apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
+                                            className="form-control"
+                                            type="text"
+                                            onPlaceSelected={(place) => {
+
+                                                var lng = place.geometry.location.lng();
+                                                var lat = place.geometry.location.lat();
+                                                var place_id = place.place_id;
+                                                let place_name = place.formatted_address;
+                                                let to = { lat, lng, place_id, place_name };
+                                                setTo(to);
+                                                console.log(to);
+
+                                            }}
+                                        />
+                                    </div>
+
+
+                                    <div className="col-md-6 my-3">
+                                        <div>
+                                            <label className="text-capitalize font-weight-bold">
+                                                {" "}
+                                                Stops
+                                            </label>
+                                        </div>
+                                        {stops.map((key, idx) => (
+                                            <label key={idx}>
+                                                <span
+                                                    className="px-2 mx-2 btn btn-outline-danger"
+                                                    onClick={(e) => removeFromStops(e, key)}
+
+                                                >
+                                                    {key.place_name}
+                                                </span>
+                                            </label>
+                                        ))}
+
+                                        <label>
+                                            <Autocomplete
+                                                apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
+                                                className="form-control"
+                                                type="text"
+
+                                                onPlaceSelected={(place) => {
+                                                    handleLocationSelected(place);
+                                                }}
+                                            />
+
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="form-group row">
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="string"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Luggage Type</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            value={luggage}
+                                            onChange={handleLuggageChange}
+                                        >
+                                            <option value={'s'}>Small</option>
+                                            <option value={'m'}>Medium</option>
+                                            <option value={'l'}>Large</option>
+
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Vehicle</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleVehicleChange}>
+                                            <option value={''}>Select Vehicle</option>
+                                            {vehicles?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Driver</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleDriverChange}>
+                                            <option value={''}>Select Driver</option>
+                                            {drivers.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Refreshments </label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleRefreshmentChange}>
+                                            <option value={'true'}>False</option>
+                                            <option value={'false'}>True</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6 my-2">
+                                        <label>Return Trip</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleReturnTrip}>
+                                            <option value={'true'}>False</option>
+                                            <option value={'false'}>True</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Booking Amount</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="number"
+                                            value={bookingMinimumAmount}
+                                            onChange={(e) => setBookingMinimumAmount(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-12 my-12">
+
+                                        <label>Fares</label>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">From</th>
+                                                    <th scope="col">To</th>
+                                                    <th scope="col">Fare</th>
+                                                </tr>
+                                            </thead>
+                                            {allPossibleFares?.map((key, idx) => (
+
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row" key={idx}>{idx + 1}</th>
+                                                        <td>{key.from}</td>
+                                                        <td>{key.to}</td>
+                                                        <input
+
+                                                            className="form-control"
+                                                            type="number"
+                                                            value={key.fare}
+                                                            onChange={(e) => setFare(e, idx)}
+                                                        />
+                                                    </tr>
+
+                                                </tbody>
+                                            ))}
+                                        </table>
+
+                                    </div>
+
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Date</label>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer
+                                                components={['DateTimePicker']}>
+                                                <DemoItem>
+                                                    <DateTimePicker
+                                                        onChange={(e) => setTripDate(e.$d.toISOString())}
+                                                    />
+                                                </DemoItem>
+                                            </DemoContainer>
+                                        </LocalizationProvider>
+
+                                    </div>
+
+                                </div>
+                                <div className="row">
+                                    <div className="col-md-3"></div>
+                                    <div className="col-md-6 mt-3">
+                                        <button
+                                            className="btn btn-outline-primary mr-2 w-100"
+                                            onClick={(e) => addNewVendor(e)}
+                                        >
+                                            Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>}
                             {masterError && (
                                 <p className="text-danger mx-2 my-2">{masterError}</p>
                             )}
