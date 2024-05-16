@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import { post } from "../../../Network/Config/Axios";
+import { showToast } from "../../../utils/Toast";
 
 
 
@@ -35,8 +36,23 @@ export default function Users() {
     }
 
     const handleChange = useCallback((state) => {
-        // setSelectedRows(state.selectedRows);
+        setSelectedRows(state.selectedRows);
     }, []);
+
+    const deleteAll = () => {
+        let ids = [];
+        selectedRows.map(row => {
+            ids.push(row.id);
+        });
+        let data = { ids };
+
+        post(`user/deleteMultiple`, data, (e, r) => {
+            if (r) {
+                showToast("Deleted successfully!");
+                navigate(0);
+            }
+        })
+    }
 
     const columns = [
 
@@ -89,28 +105,35 @@ export default function Users() {
     ];
     return (
         <>
-          <div className="mt-20">
-            <div className="row">
-              <div className="col-12 col-xl-12">
-    
-                <DataTable
-                  actions={<button
-                    type="button"
-                    className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                    onClick={() => navigate("/addUser")}
-                  >
-                    Add User
-                  </button>}
-                  title="Users"
-                  data={tableDataItems}
-                  columns={columns}
-                  selectableRows
-                  onSelectedRowsChange={handleChange}
-                />
-              </div>
+            <div className="mt-20">
+                <div className="row">
+                    <div className="col-12 col-xl-12">
+
+                        <DataTable
+                            actions={<button
+                                type="button"
+                                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                                onClick={() => navigate("/addUser")}
+                            >
+                                Add User
+                            </button>}
+                            contextActions={<button
+                                type="button"
+                                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                                onClick={() => deleteAll()}
+                            >
+                                Delete
+                            </button>}
+                            title="Users"
+                            data={tableDataItems}
+                            columns={columns}
+                            selectableRows
+                            onSelectedRowsChange={handleChange}
+                        />
+                    </div>
+                </div>
             </div>
-          </div>
-    
+
         </>
-      );
+    );
 }

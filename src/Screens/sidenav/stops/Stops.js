@@ -43,15 +43,12 @@ export default function Stops() {
 
     const [tableDataItems, setTableDataItems] = useState([]);
 
-    // useEffect(() => {
-    //   console.log("state", selectedRows);
-    // }, [selectedRows]);
 
     useEffect(() => {
 
-        get(`stops/all`, (e,r)=> {
-            if(r){
-              setTableDataItems(r.result);
+        get(`stops/all`, (e, r) => {
+            if (r) {
+                setTableDataItems(r.result);
             }
         })
 
@@ -177,48 +174,48 @@ export default function Stops() {
         }
     ];
     return (
-            <div className="mt-20">
+        <div className="mt-20">
 
-                <div className="row">
-                    <div className="col-12 col-xl-12">
+            <div className="row">
+                <div className="col-12 col-xl-12">
 
-                        <DataTable
-                            actions={<button
-                                type="button"
-                                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
-                                onClick={() => navigate("/addIndustry")}
-                            >
-                                Add Stops
-                            </button>}
-                            title="Stops"
-                            data={tableDataItems}
-                            columns={columns}
-                            selectableRows
-                            onSelectedRowsChange={handleChange}
-                        />
-
-
-
-
-                        <button onClick={handleResetLocation}>Reset Location</button>
-                        <label>Latitute:</label><input type='text' value={location.lat} disabled />
-                        <label>Longitute:</label><input type='text' value={location.lng} disabled />
-                        <label>Zoom:</label><input type='text' value={zoom} disabled />
-                        <button onClick={handleLocationClick}>Get Location Location</button>
+                    <DataTable
+                        actions={<button
+                            type="button"
+                            className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                            onClick={() => navigate("/addIndustry")}
+                        >
+                            Add Stops
+                        </button>}
+                        title="Stops"
+                        data={tableDataItems}
+                        columns={columns}
+                        selectableRows
+                        onSelectedRowsChange={handleChange}
+                    />
 
 
 
 
+                    <button onClick={handleResetLocation}>Reset Location</button>
+                    <label>Latitute:</label><input type='text' value={location.lat} disabled />
+                    <label>Longitute:</label><input type='text' value={location.lng} disabled />
+                    <label>Zoom:</label><input type='text' value={zoom} disabled />
+                    <button onClick={handleLocationClick}>Get Location Location</button>
 
-                        <Autocomplete
-                            apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
-                            onPlaceSelected={(place) => {
-                                console.log(place);
-                                console.log("this is latitude", place.geometry.location.lat())
-                            }}
-                        />
 
-                        {/*        <APIProvider apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'>
+
+
+
+                    <Autocomplete
+                        apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
+                        onPlaceSelected={(place) => {
+                            console.log(place);
+                            console.log("this is latitude", place.geometry.location.lat())
+                        }}
+                    />
+
+                    {/*        <APIProvider apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'>
           <Map
               style={{width: '100vw', height: '100vh'}}
               defaultCenter={{lat: 22.54992, lng: 0}}
@@ -228,15 +225,15 @@ export default function Stops() {
             />
             </APIProvider> */}
 
-                        <APIProvider apiKey={'AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'}>
-                            <Map center={location} zoom={10} style={{ width: '100vw', height: '100vh' }}
-                            >
-                                <Marker position={location} />
-                            </Map>
-                        </APIProvider>
+                    <APIProvider apiKey={'AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'}>
+                        <Map center={location} zoom={10} style={{ width: '100vw', height: '100vh' }}
+                        >
+                            <Marker position={location} />
+                        </Map>
+                    </APIProvider>
 
-                    </div>
                 </div>
             </div>
+        </div>
     );
 }

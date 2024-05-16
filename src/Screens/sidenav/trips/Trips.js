@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import { post } from "../../../Network/Config/Axios";
+import { showToast } from "../../../utils/Toast";
 
 
 
@@ -10,10 +11,6 @@ export default function Trips() {
   const [selectedRows, setSelectedRows] = useState([]);
 
   const [tableDataItems, setTableDataItems] = useState([]);
-
-  // useEffect(() => {
-  //   console.log("state", selectedRows);
-  // }, [selectedRows]);
 
   useEffect(() => {
 
@@ -39,29 +36,6 @@ export default function Trips() {
       }
     })
 
-    // let config = {
-    //   method: 'post',
-    //   url: 'http://127.0.0.1:3003/api/admintrips/all',
-    //   withCredentials: true,
-    //   headers: {
-    //     'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
-    //   }
-    //   ,
-
-
-
-    // };
-
-    // axios(config)
-    //   .then(function (response) {
-    //     console.log("this is the response of the vendor apis ", response.data.result);
-    //     setTableDataItems(response.data.result);
-    //     console.log("this is the datatables items", response.data.data)
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-
   }, [])
 
   const handleButtonEditClick = (r) => {
@@ -74,10 +48,23 @@ export default function Trips() {
   }
 
   const handleChange = useCallback((state) => {
-    // setSelectedRows(state.selectedRows);
+    setSelectedRows(state.selectedRows);
   }, []);
 
+  const deleteAll = () => {
+    let ids = [];
+    selectedRows.map(row => {
+      ids.push(row.id);
+    });
+    let data = { ids };
 
+    post(`trips/deleteMultiple`, data, (e, r) => {
+      if (r) {
+        showToast("Deleted successfully!");
+        navigate(0);
+      }
+    })
+  }
 
 
   const columns = [
@@ -227,6 +214,13 @@ export default function Trips() {
                 onClick={() => navigate("/addTrip")}
               >
                 Add Trip
+              </button>}
+              contextActions={<button
+                type="button"
+                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                onClick={() => deleteAll()}
+              >
+                Delete
               </button>}
               title="Trips"
               data={tableDataItems}
