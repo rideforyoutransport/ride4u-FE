@@ -88,7 +88,7 @@ export default function AddTrip() {
     const [vehicle, setVehicle] = useState({ 'name': '', 'id': '' });
     const [luggage, setLuggage] = useState('s');
     const [refreshments, setRefreshments] = useState(false);
-    const [bookingMinimumAmount, setBookingMinimumAmount] = useState(0);
+    const [bookingMinimumAmount, setBookingMinimumAmount] = useState(25);
     const [totalTripAmount, settotalTripAmount] = useState(0);
     const [tripDiscription, setTripDiscription] = useState('');
     const [cancelationCharges, setCancelationCharges] = useState(0);
@@ -149,11 +149,15 @@ export default function AddTrip() {
     useEffect(() => {
 
         let tempFareObj = []
-        for (let index = 0; index < stops.length; index++) {
-            for (let j = index + 1; j < stops.length; j++) {
+        let stopsCurr = [];
+        stopsCurr.push(from);
+        stopsCurr.push(...stops);
+        stopsCurr.push(to);
+        for (let index = 0; index < stopsCurr.length; index++) {
+            for (let j = index + 1; j < stopsCurr.length; j++) {
                 let element = {
-                    "from": stops[index].place_name,
-                    "to": stops[j].place_name,
+                    "from": stopsCurr[index].place_name,
+                    "to": stopsCurr[j].place_name,
                     "fare": 0
                 }
                 tempFareObj.push(element);
@@ -162,7 +166,7 @@ export default function AddTrip() {
         setAllPossibleFares(tempFareObj);
         console.log(allPossibleFares)
 
-    }, [stops])
+    }, [stops, from, to])
 
 
 
@@ -369,7 +373,7 @@ export default function AddTrip() {
                                     </div>
 
                                     <div className="col-md-6 my-3">
-                                        <label>From </label>
+                                        <label>Origin </label>
                                         {/* <input
                                     id="m_no"
                                     className="form-control"
@@ -401,7 +405,7 @@ export default function AddTrip() {
 
                                     <div className="col-md-6 my-2">
 
-                                        <label>To </label>
+                                        <label>Destination </label>
 
                                         <Autocomplete
                                             apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
@@ -455,7 +459,19 @@ export default function AddTrip() {
                                         </label>
                                     </div>
                                 </div>
+                            
                                 <div className="form-group row">
+                                    <div className="col-md-6 my-3">
+                                        <label>Trip Description</label>
+                                        <input
+                                            id="m_no"
+                                            className="form-control"
+                                            name="m_no"
+                                            type="string"
+                                            value={tripDiscription}
+                                            onChange={(e) => setTripDiscription(e.target.value)}
+                                        />
+                                    </div>
                                     <div className="col-md-6 my-2">
                                         <label>Luggage Type</label>
                                         <select
@@ -515,51 +531,6 @@ export default function AddTrip() {
                                             type="number"
                                             value={bookingMinimumAmount}
                                             onChange={(e) => setBookingMinimumAmount(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-3">
-                                        <label>Cancellation Amount</label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="m_no"
-                                            type="number"
-                                            value={cancelationCharges}
-                                            onChange={(e) => setCancelationCharges(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className="col-md-6 my-3">
-                                        <label>Total Trip Amount</label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="m_no"
-                                            type="number"
-                                            value={totalTripAmount}
-                                            onChange={(e) => settotalTripAmount(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-3">
-                                        <label>Trip Description</label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="m_no"
-                                            type="string"
-                                            value={tripDiscription}
-                                            onChange={(e) => setTripDiscription(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 my-3">
-                                        <label>Trip Description</label>
-                                        <input
-                                            id="m_no"
-                                            className="form-control"
-                                            name="m_no"
-                                            type="number"
-                                            value={tripDiscription}
-                                            onChange={(e) => setTripDiscription(e.target.value)}
                                         />
                                     </div>
 
