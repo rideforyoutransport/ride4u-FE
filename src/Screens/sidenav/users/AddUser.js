@@ -31,7 +31,7 @@ export default function AddUser() {
                 phoneNumber: number,
                 email
             }
-            patch(`user/${state.id}`, data, (e,r)=> {
+            patch(`trips/${state.id}`, data, (e,r)=> {
                 if(r){
                     if(r.success){
                         showToast("User updated successfully!");
