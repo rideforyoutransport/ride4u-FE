@@ -154,8 +154,8 @@ export default function AddTrip() {
              {
                 "isReturnTrip": true,
                 "vendor": vendor.id,
-                "from": from,
-                "to": to,
+                "from": to,
+                "to": from,
                 "duration": 0,
                 "tripDate": tripDateReturn,
                 "vehicle": vehicle.id,
@@ -197,8 +197,8 @@ export default function AddTrip() {
                  {
                     "isReturnTrip": true,
                     "vendor": vendor.id,
-                    "from": from,
-                    "to": to,
+                    "from": to,
+                    "to": from,
                     "duration": 0,
                     "tripDate": tripDateReturn,
                     "vehicle": vehicle.id,
