@@ -5,12 +5,17 @@ import axios from "axios";
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import Autocomplete from "react-google-autocomplete";
 import { get } from "../../../Network/Config/Axios";
+import socketIOClient from "socket.io-client";
+
+
 
 
 
 
 const DefaultLocation = { lat: 25, lng: 75 };
 const DefaultZoom = 40;
+const ENDPOINT = "http://127.0.0.1:3003";
+
 
 export default function Stops() {
     const navigate = useNavigate();
@@ -42,6 +47,13 @@ export default function Stops() {
 
 
     const [tableDataItems, setTableDataItems] = useState([]);
+
+    useEffect(() => {
+        const socket = socketIOClient(ENDPOINT);
+        socket.on("FromAPI", data => {
+          console.log(data);
+        });
+      }, []);
 
 
     useEffect(() => {
@@ -195,7 +207,7 @@ export default function Stops() {
                     />
 
 
-
+   {/* 
 
                     <button onClick={handleResetLocation}>Reset Location</button>
                     <label>Latitute:</label><input type='text' value={location.lat} disabled />
@@ -223,14 +235,14 @@ export default function Stops() {
               gestureHandling={'greedy'}
               disableDefaultUI={true}
             />
-            </APIProvider> */}
+            </APIProvider> 
 
-                    <APIProvider apiKey={'AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'}>
+                   <APIProvider apiKey={'AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'}>
                         <Map center={location} zoom={10} style={{ width: '100vw', height: '100vh' }}
                         >
                             <Marker position={location} />
                         </Map>
-                    </APIProvider>
+        </APIProvider>*/ }
 
                 </div>
             </div>
