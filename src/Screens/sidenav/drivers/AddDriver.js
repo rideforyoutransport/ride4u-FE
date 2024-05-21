@@ -149,7 +149,7 @@ export default function AddDriver() {
                                     <div className="col-md-3"></div>
                                     <div className="col-md-6 mt-3">
                                         <button
-                                            className="btn btn-outline-primary mr-2 w-100"
+                                            className="btn btn-outline-warning mr-2 w-100"
                                             onClick={(e) => {
                                                 addUpdateDriver(e)
                                             }}

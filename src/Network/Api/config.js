@@ -1,6 +1,7 @@
 import { get } from "../../utils/Crypto";
 
-let DEVELOPMENT_MODE = window.location.href.includes("localhost");
+//let DEVELOPMENT_MODE = window.location.href.includes("localhost");
+let DEVELOPMENT_MODE = true;
 
 let api, token;
 if (DEVELOPMENT_MODE) {

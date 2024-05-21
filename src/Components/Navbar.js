@@ -55,6 +55,11 @@ export default function Navbar() {
               <span className="link-title">Vehicles</span>
             </Link>
           </li>
+          <li className="nav-item">
+            <Link to="requestedTrips" className="nav-link">
+              <span className="link-title">Requested Trips</span>
+            </Link>
+          </li>
 
           <li className="nav-item">
             <Link to="vendors" className="nav-link">

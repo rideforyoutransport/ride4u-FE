@@ -13,7 +13,7 @@ export default function TopBar() {
           <div className="d-flex align-items-center">
             <button
               type="button"
-              className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0 me-5"
+              className="btn btn-outline-warning btn-icon-text mb-2 mb-md-0 me-5"
               onClick={() => {
                 clear();
                 window.location = '/';

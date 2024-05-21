@@ -105,7 +105,7 @@ export default function AddTrip() {
 
 
     const [tripDetails, setTripDetails] = useState(addTripObj);
-    const [allPossibleFares, setAllPossibleFares] = useState([])
+    const [allPossibleFares, setAllPossibleFares] = useState([]);
     const [allPossibleFaresReturn, setAllPossibleFaresReturn] = useState([])
 
 
@@ -814,7 +814,7 @@ export default function AddTrip() {
                                 <div className="col-md-3"></div>
                                 <div className="col-md-6 mt-3">
                                     <button
-                                        className="btn btn-outline-primary mr-2 w-100"
+                                        className="btn btn-outline-warning mr-2 w-100"
                                         onClick={(e) => addUpdateTrip(e)}
                                     >
                                         Submit

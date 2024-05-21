@@ -113,14 +113,14 @@ export default function Users() {
                         <DataTable
                             actions={<button
                                 type="button"
-                                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                                className="btn btn-outline-warning btn-icon-text mb-2 mb-md-0"
                                 onClick={() => navigate("/addUser")}
                             >
                                 Add User
                             </button>}
                             contextActions={<button
                                 type="button"
-                                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                                className="btn btn-outline-warning btn-icon-text mb-2 mb-md-0"
                                 onClick={() => deleteAll()}
                             >
                                 Delete

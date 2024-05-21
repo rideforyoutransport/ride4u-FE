@@ -17,6 +17,7 @@ import AddVehicle from '../sidenav/vehicles/AddVehicle';
 import AddVendor from '../sidenav/vendors/AddVendor';
 import AddDriver from '../sidenav/drivers/AddDriver';
 import AddUser from '../sidenav/users/AddUser';
+import RequestedTrips from '../sidenav/requestedTrips/RequestedTrips';
 
 
 
@@ -35,6 +36,7 @@ export default function Home() {
           <Route path="vehicles" element={<Vehicles />} />
           <Route path="vendors" element={<Vendors />} />
           <Route path="users" element={<Users />} />
+          <Route path="requestedTrips" element={<RequestedTrips />} />
           <Route path="changePassword" element={<ChangePassword />} />
 
           <Route path="addTrip" element={<AddTrip />} />

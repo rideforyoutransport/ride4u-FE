@@ -184,7 +184,7 @@ export default function Trips() {
     // },
     // {
     //   name: "Change Status",
-    //   cell: (r) => <button className="btn btn-outline-primary btn-sm" onClick={() => handleButtonClick(r)}>{r.deleted ? 'In-Active' : 'Active'}</button>,
+    //   cell: (r) => <button className="btn btn-outline-warning btn-sm" onClick={() => handleButtonClick(r)}>{r.deleted ? 'In-Active' : 'Active'}</button>,
     //   ignoreRowClick: true,
     //   allowOverflow: true,
     //   button: true,
@@ -208,14 +208,14 @@ export default function Trips() {
             <DataTable
               actions={<button
                 type="button"
-                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                className="btn btn-outline-warning btn-icon-text mb-2 mb-md-0"
                 onClick={() => navigate("/addTrip")}
               >
                 Add Trip
               </button>}
               contextActions={<button
                 type="button"
-                className="btn btn-outline-primary btn-icon-text mb-2 mb-md-0"
+                className="btn btn-outline-warning btn-icon-text mb-2 mb-md-0"
                 onClick={() => deleteAll()}
               >
                 Delete
