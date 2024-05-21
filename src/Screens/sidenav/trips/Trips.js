@@ -39,12 +39,7 @@ export default function Trips() {
   }, [])
 
   const handleButtonEditClick = (r) => {
-
-    //handle the edit functionality 
-
-    // navigate(`/editVendor?vendor=${r.id}`)
-    navigate('/editVendor', { state: r });
-
+    navigate('/addTrip', { state: r });
   }
 
   const handleChange = useCallback((state) => {
@@ -55,6 +50,9 @@ export default function Trips() {
     let ids = [];
     selectedRows.map(row => {
       ids.push(row.id);
+      if(row.returnTrip){
+        ids.push(row.returnTrip);
+      }
     });
     let data = { ids };
 

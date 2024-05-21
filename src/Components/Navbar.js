@@ -33,12 +33,12 @@ export default function Navbar() {
             </Link>
           </li>
 
-          <li className="nav-item">
+          {/* <li className="nav-item">
             <Link to="stops" className="nav-link">
               <i className="link-icon" data-feather="box"></i>
               <span className="link-title">Stops</span>
             </Link>
-          </li>
+          </li> */}
 
           <li className="nav-item">
             <Link to="users" className="nav-link">

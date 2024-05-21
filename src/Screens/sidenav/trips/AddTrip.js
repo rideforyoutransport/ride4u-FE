@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Autocomplete from "react-google-autocomplete";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import { TenMp } from "@mui/icons-material";
-import { get, post , patch } from "../../../Network/Config/Axios";
+import { get, post, patch } from "../../../Network/Config/Axios";
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -86,7 +86,7 @@ export default function AddTrip() {
     const [vendor, setVendor] = useState({});
     const [driver, setDriver] = useState({ 'name': '', 'id': '' });
     const [vehicle, setVehicle] = useState({ 'name': '', 'id': '' });
-    const [luggage, setLuggage] = useState('s');
+    const [luggage, setLuggage] = useState([]);
     const [refreshments, setRefreshments] = useState(false);
     const [bookingMinimumAmount, setBookingMinimumAmount] = useState(25);
     const [totalTripAmount, settotalTripAmount] = useState(0);
@@ -136,45 +136,40 @@ export default function AddTrip() {
     let addUpdateTrip = (e) => {
         e.preventDefault();
 
-        if(state){
+        if (state) {
 
-         let  data = {
-            "vendor": vendor.id,
-            "from": from,
-            "to": to,
-            "duration": 0,
-            "tripDate": tripDate,
-            "vehicle": vehicle.id,
-            "driver": driver.id,
-            "luggage": [...luggage],
-            "stops": [...stops],
-            "totalTripAmount": totalTripAmount,
-            "refreshments": refreshments,
-            "returnTrip" :returnTrip?
-             {
-                "isReturnTrip": true,
+            let data = {
                 "vendor": vendor.id,
                 "from": from,
                 "to": to,
                 "duration": 0,
-                "tripDate": tripDateReturn,
+                "tripDate": tripDate,
                 "vehicle": vehicle.id,
                 "driver": driver.id,
                 "luggage": [...luggage],
-                "stops": [...stopsReturn],
+                "stops": [...stops],
                 "totalTripAmount": totalTripAmount,
-                "refreshments": refreshments
-            }:{},
-            "fares":allPossibleFares
-        }
-            // let data = {
-            //     name,
-            //     phoneNumber: number,
-            //     email
-            // }
-            patch(`trips/${state.id}`, data, (e,r)=> {
-                if(r){
-                    if(r.success){
+                "refreshments": refreshments,
+                "returnTrip": returnTrip ?
+                    {
+                        "isReturnTrip": true,
+                        "vendor": vendor.id,
+                        "from": from,
+                        "to": to,
+                        "duration": 0,
+                        "tripDate": tripDateReturn,
+                        "vehicle": vehicle.id,
+                        "driver": driver.id,
+                        "luggage": [...luggage],
+                        "stops": [...stopsReturn],
+                        "totalTripAmount": totalTripAmount,
+                        "refreshments": refreshments
+                    } : null,
+                "fares": allPossibleFares
+            }
+            patch(`trips/${state.id}`, data, (e, r) => {
+                if (r) {
+                    if (r.success) {
                         showToast("User updated successfully!");
                         navigate("/trips");
                     }
@@ -193,27 +188,27 @@ export default function AddTrip() {
                 "stops": [...stops],
                 "totalTripAmount": totalTripAmount,
                 "refreshments": refreshments,
-                "returnTrip" :returnTrip?
-                 {
-                    "isReturnTrip": true,
-                    "vendor": vendor.id,
-                    "from": from,
-                    "to": to,
-                    "duration": 0,
-                    "tripDate": tripDateReturn,
-                    "vehicle": vehicle.id,
-                    "driver": driver.id,
-                    "luggage": [...luggage],
-                    "stops": [...stopsReturn],
-                    "totalTripAmount": totalTripAmount,
-                    "refreshments": refreshments
-                }:{},
-                "fares":allPossibleFares
+                "returnTrip": returnTrip ?
+                    {
+                        "isReturnTrip": true,
+                        "vendor": vendor.id,
+                        "from": from,
+                        "to": to,
+                        "duration": 0,
+                        "tripDate": tripDateReturn,
+                        "vehicle": vehicle.id,
+                        "driver": driver.id,
+                        "luggage": [...luggage],
+                        "stops": [...stopsReturn],
+                        "totalTripAmount": totalTripAmount,
+                        "refreshments": refreshments
+                    } : null,
+                "fares": allPossibleFares
 
             }
-            post(`trips/add`, data, (e,r)=> {
-                if(r){
-                    if(r.success){
+            post(`trips/add`, data, (e, r) => {
+                if (r) {
+                    if (r.success) {
                         showToast("Trip added successfully!");
                         navigate("/trip");
                     }
@@ -229,11 +224,9 @@ export default function AddTrip() {
                 setVehicles(r.result);
                 post(`driver/all`, {}, (e, r1) => {
                     if (r1) {
-                        console.log("==================drivers====================", r1);
                         setDrivers(r1.result.items);
                         post(`vendor/all`, {}, (e, r2) => {
                             if (r2) {
-                                console.log("==================vendors====================", r2);
                                 setVendors(r2.result.items);
                             }
                         })
@@ -252,8 +245,8 @@ export default function AddTrip() {
         for (let index = 0; index < stopsCurr.length; index++) {
             for (let j = index + 1; j < stopsCurr.length; j++) {
                 let element = {
-                    "from": {"name":stopsCurr[index].place_name,"place_id":stopsCurr[index].place_id},
-                    "to": {"name":stopsCurr[j].place_name,"place_id":stopsCurr[j].place_id},
+                    "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                    "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
                     "fare": 0
                 }
                 tempFareObj.push(element);
@@ -357,117 +350,34 @@ export default function AddTrip() {
         setTripDetails(copiedValue);
     };
 
-    const addNewVendor = (e) => {
-        e.preventDefault();
-        if (
-            companyEmailError == null &&
-            companyMobileError == null &&
-            passwordError == null &&
-            passwordReError == null &&
-            // companyEmail.length > 0 &&
-            // comapnyName.length > 0 &&
-            companyGstin.length > 0
-        ) {
-            if (document.getElementById("file").files[0]) {
-                const formData = new FormData();
-                // formData.append("pPassword", companyPassword);
-                formData.append("file", document.getElementById("file").files[0]);
-                // formData.append("pName", comapnyName);
-                // formData.append("pSocials", JSON.stringify(companySocialMedia));
-                // formData.append("pEmail", companyEmail);
-                formData.append("pPhone", companyMobile);
-                formData.append("pWebsite", companyUrl);
-                // formData.append("pAddress", JSON.stringify(companyAddress));
-                // formData.append("pGstin", companyGstin);
-                // formData.append("deleted", panelStatus);
-                // formData.append("deleted", companyStatus);
-                // formData.append("pQrType", qrType);
-                // formData.append("pContactPerson", contactPerson);
-                formData.append("pPanelStatus", true);
-                //   formData.append("industry", companyIndustry);
-                formData.append("pContactPersonNumber", contactPersonNumber);
-                // formData.aclppend("productsAwailing", JSON.stringify(productsAvailing));
-                //  formData.append("userTypes", JSON.stringify(userTypes));
-                formData.append("pUserRequirement", companyUserReqirements);
-                if (demoValue) {
-                    formData.append("pDemoValue", demoValue);
-                }
-                console.log(formData);
-                var config = {
-                    method: "post",
-                    url: "http://127.0.0.1:3003/admin/vendor/add",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Authorization': 'Bearer ' + sessionStorage.getItem('access_token'),
-
-                    },
-                    data: formData,
-                };
-                axios(config)
-                    .then(function (response) {
-                        console.log(response.data.data);
-                        const { id } = response.data.data;
-
-                        setVendorId(id);
-
-                        resetValues();
-                        alert(`redirecting to set Rewardify Options ${id}`);
-                        setTimeout(() => {
-                            navigate(`/basicSetup?vendor=${id}`);
-                        }, 2000);
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    })
-                    .finally(() => { });
-            } else {
-                setLogoErr("Upload Image First");
-            }
-        } else {
-            setMasterError(
-                "Please Fill All the Required fields and check the errors",
-            );
-        }
-    };
-
     const resetValues = () => {
-  
-    setVehicle([]);
-    setDrivers([]);
-    setVendors([]);
-    setVendor({});
-    setDriver({ 'name': '', 'id': '' });
-    setVehicle({ 'name': '', 'id': '' });
-    setLuggage('s');
-    settotalTripAmount(0);
-    setTripDiscription('');
-    setRequestedTrip(false);
-    setReturnTrip(false);
-    setFrom({});
-    setTo({});
-    setStops([]);
-    setStopsReturn([]);
-    setAllPossibleFares([]);
-    setAllPossibleFaresReturn([]);
 
-    };
+        setVehicle([]);
+        setDrivers([]);
+        setVendors([]);
+        setVendor({});
+        setDriver({ 'name': '', 'id': '' });
+        setVehicle({ 'name': '', 'id': '' });
+        setLuggage('s');
+        settotalTripAmount(0);
+        setTripDiscription('');
+        setRequestedTrip(false);
+        setReturnTrip(false);
+        setFrom({});
+        setTo({});
+        setStops([]);
+        setStopsReturn([]);
+        setAllPossibleFares([]);
+        setAllPossibleFaresReturn([]);
 
-    const handleChange = (event) => {
-        // setProductCategoryId(event.target.value);
-    };
-
-    const handleCompanyStatus = (event) => {
-        setCompanyStatus(event.target.value);
-    };
-    const handleCompanyPanelStatus = (event) => {
-        // console.log(panelStatus);
-        console.log(event.target.value);
-        setPanelStatus(event.target.value);
     };
 
     const handleLuggageChange = (event) => {
-        setLuggage(event.target.value);
-        console.log({ luggage });
+        if(luggage.includes(event.target.value)){
+            luggage.splice(luggage.indexOf(event.target.value), 1);
+        } else {
+            luggage.push(event.target.value);
+        }
     };
 
 
@@ -524,8 +434,8 @@ export default function AddTrip() {
                                             className="js-example-basic-single w-100"
                                             onChange={handleVendorChange}
                                         >
-                                        <option value={''}>Select Vendor</option>
-                                        {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
+                                            <option value={''}>Select Vendor</option>
+                                            {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
                                         </select>
 
                                     </div>
@@ -625,7 +535,8 @@ export default function AddTrip() {
                                     <div className="col-md-6 my-2">
                                         <label>Luggage Type</label>
                                         <select
-                                            className="js-example-basic-single w-100"
+                                            multiple
+                                            className="js-example-basic-multiple w-100"
                                             value={luggage}
                                             onChange={handleLuggageChange}
                                         >
@@ -752,19 +663,19 @@ export default function AddTrip() {
                                             value={tripDetails.vendor}
                                             onChange={handleVendorChange}
                                         >
-                                        <option value={''}>Select Vendor</option>
-                                        {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
+                                            <option value={''}>Select Vendor</option>
+                                            {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
                                         </select>
                                     </div>
                                     <div className="col-md-6 my-2">
-                                    <label>Vendor</label>
-                                    <select
-                                        className="js-example-basic-single w-100"
-                                        onChange={handleVendorChange}>
-                                        <option value={''}>Select Vendor</option>
-                                        {vendors?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
-                                    </select>
-                                </div>
+                                        <label>Vendor</label>
+                                        <select
+                                            className="js-example-basic-single w-100"
+                                            onChange={handleVendorChange}>
+                                            <option value={''}>Select Vendor</option>
+                                            {vendors?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
+                                        </select>
+                                    </div>
 
                                     <div className="col-md-6 my-3">
                                         <label>Origin </label>

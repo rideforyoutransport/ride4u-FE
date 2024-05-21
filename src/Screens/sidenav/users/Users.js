@@ -45,6 +45,7 @@ export default function Users() {
             ids.push(row.id);
         });
         let data = { ids };
+        console.log(data);
 
         post(`user/deleteMultiple`, data, (e, r) => {
             if (r) {
