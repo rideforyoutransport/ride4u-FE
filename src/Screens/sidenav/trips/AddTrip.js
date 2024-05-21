@@ -131,7 +131,48 @@ export default function AddTrip() {
         }
     }, [companyEmailError, passwordError, passwordReError, companyMobileError]);
 
+    useEffect(() => {
 
+        get(`vehicle/all`, (e, r) => {
+            if (r) {
+                setVehicles(r.result);
+                post(`driver/all`, {}, (e, r1) => {
+                    if (r1) {
+                        console.log("==================drivers====================", r1);
+                        setDrivers(r1.result.items);
+                        post(`vendor/all`, {}, (e, r2) => {
+                            if (r2) {
+                                console.log("==================vendors====================", r2);
+                                setVendors(r2.result.items);
+                            }
+                        })
+                    }
+                })
+
+
+            }
+            console.log("this is the state ",state);
+            if(state){
+                setVehicle(state.vehicle);
+                setDriver(state.driver);
+                setVendor(state.vendor);
+                setLuggage(state.luggage);
+                setTripDiscription(state.tripDescription);
+                setRequestedTrip(state.requestedTrip);
+                setRefreshments(state.refreshments);
+                setReturnTrip();
+                setFrom(state.from);
+                setTo(state.to);
+                setStops(state.stops);
+                setStopsReturn([]);
+                setAllPossibleFares([]);
+                setAllPossibleFaresReturn([]);
+            }
+        })
+
+   
+
+    }, [])
 
     let addUpdateTrip = (e) => {
         e.preventDefault();
@@ -148,7 +189,8 @@ export default function AddTrip() {
                 "driver": driver.id,
                 "luggage": [...luggage],
                 "stops": [...stops],
-                "totalTripAmount": totalTripAmount,
+                "tripDescription":tripDiscription,
+            "totalTripAmount": totalTripAmount,
                 "refreshments": refreshments,
                 "returnTrip": returnTrip ?
                     {
@@ -186,6 +228,7 @@ export default function AddTrip() {
                 "driver": driver.id,
                 "luggage": [...luggage],
                 "stops": [...stops],
+                "tripDescription":tripDiscription,
                 "totalTripAmount": totalTripAmount,
                 "refreshments": refreshments,
                 "returnTrip": returnTrip ?
@@ -224,9 +267,11 @@ export default function AddTrip() {
                 setVehicles(r.result);
                 post(`driver/all`, {}, (e, r1) => {
                     if (r1) {
+                        console.log("==================drivers====================", r1);
                         setDrivers(r1.result.items);
                         post(`vendor/all`, {}, (e, r2) => {
                             if (r2) {
+                                console.log("==================vendors====================", r2);
                                 setVendors(r2.result.items);
                             }
                         })
@@ -255,6 +300,12 @@ export default function AddTrip() {
         setAllPossibleFares(tempFareObj);
         console.log(allPossibleFares)
     }, [stops, from, to])
+
+
+    // set return stops 
+    useEffect(() => {
+        setStopsReturn([...stops].reverse());
+    }, [returnTrip])
 
     useEffect(() => {
         let tempFareObj = []
@@ -307,7 +358,7 @@ export default function AddTrip() {
 
     const removeFromStopsReturn = (e, key) => {
         console.log(key);
-        let oldValues = [...stops];
+        let oldValues = [...stopsReturn];
         oldValues = oldValues.filter((stop) => stop != key);
         setStopsReturn(oldValues);
     };
@@ -500,7 +551,7 @@ export default function AddTrip() {
                                                     onClick={(e) => removeFromStops(e, key)}
 
                                                 >
-                                                    {key.place_name}
+                                                    {key?key.place_name:"Some Stop"}
                                                 </span>
                                             </label>
                                         ))}
@@ -736,7 +787,6 @@ export default function AddTrip() {
                                                 <span
                                                     className="px-2 mx-2 btn btn-outline-danger"
                                                     onClick={(e) => removeFromStopsReturn(e, key)}
-
                                                 >
                                                     {key.place_name}
                                                 </span>

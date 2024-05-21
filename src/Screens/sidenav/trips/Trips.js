@@ -39,7 +39,16 @@ export default function Trips() {
   }, [])
 
   const handleButtonEditClick = (r) => {
+<<<<<<< HEAD
     navigate('/addTrip', { state: r });
+=======
+
+    //handle the edit functionality 
+
+    // navigate(`/editVendor?vendor=${r.id}`)
+    navigate('/addTrip', { state: r });
+
+>>>>>>> 30f1980 ( minor changes)
   }
 
   const handleChange = useCallback((state) => {
