@@ -140,8 +140,8 @@ export default function AddTrip() {
 
             let data = {
                 "vendor": vendor.id,
-                "from": from,
-                "to": to,
+                "from": to,
+                "to": from,
                 "duration": 0,
                 "tripDate": tripDate,
                 "vehicle": vehicle.id,

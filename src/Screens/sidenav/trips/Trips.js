@@ -16,7 +16,7 @@ export default function Trips() {
 
     let data = {
       "from": 0,
-      "to": 5,
+      "to": 500,
       "expandKeys": {
         "from": [
           "name",
@@ -142,7 +142,7 @@ export default function Trips() {
     // },
     {
       name: "Vehicle",
-      selector: (row) => row.vehicle.name,
+      selector: (row) => row.vehicle!=null?row.vehicle.name:"Some Vehicle",
       sortable: true,
       index: 10
     },
