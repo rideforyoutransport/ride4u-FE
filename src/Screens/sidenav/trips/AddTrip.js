@@ -210,7 +210,7 @@ export default function AddTrip() {
                 if (r) {
                     if (r.success) {
                         showToast("Trip added successfully!");
-                        navigate("/trip");
+                        navigate("/");
                     }
                 }
             })
