@@ -20,13 +20,25 @@ export default function Trips() {
       "expandKeys": {
         "from": [
           "name",
-          "id"
+          "id",
+          "place_id",
+          "geoLocation"
         ],
-        "to": [],
+        "to": [
+          "name",
+          "id",
+          "place_id",
+          "geoLocation"
+        ],
         "vehicle": [],
-        "stops": [],
+        "stops": [
+          "name",
+          "id",
+          "place_id",
+          "geoLocation"
+        ],
         "driver": ["name", "id", "number", "rating"],
-        "vendor": []
+        "vendor": [],
       }
     }
 
@@ -50,7 +62,7 @@ export default function Trips() {
     let ids = [];
     selectedRows.map(row => {
       ids.push(row.id);
-      if(row.returnTrip){
+      if (row.returnTrip) {
         ids.push(row.returnTrip);
       }
     });
@@ -88,7 +100,7 @@ export default function Trips() {
       index: 2
     },
     {
-      name: "Booking Minimum Amount",
+      name: "Booking Amount",
       selector: (row) => row.bookingMinimumAmount,
       sortable: true,
       index: 3
@@ -142,15 +154,21 @@ export default function Trips() {
     // },
     {
       name: "Vehicle",
-      selector: (row) => row.vehicle!=null?row.vehicle.name:"Some Vehicle",
+      selector: (row) => row.vehicle != null ? row.vehicle.name : "Some Vehicle",
       sortable: true,
       index: 10
     },
     {
       name: "Stops",
-      selector: (row) => row.stops.toString(),
+      selector: (row) => {
+        let stops = "";
+        row.stops.map((stop) => {
+          stops = stops + stop.name + ", "
+        })
+        return stops;
+      },
       sortable: true,
-      index: 11
+      index: 11,
     },
 
 
@@ -222,6 +240,7 @@ export default function Trips() {
               </button>}
               title="Trips"
               data={tableDataItems}
+              fixedHeader={true}
               columns={columns}
               selectableRows
               onSelectedRowsChange={handleChange}
