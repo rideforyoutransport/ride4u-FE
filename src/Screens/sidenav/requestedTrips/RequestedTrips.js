@@ -14,7 +14,15 @@ export default function RequestedTrips() {
 
     useEffect(() => {
 
-        post(`trips/requestedTrips`, {}, (e, r) => {
+        let data = {
+            "expandKeys": {
+                "origin": [],
+                "destination": [],
+                "requestingUser": []
+            }
+        }
+
+        post(`requestedTrips/all`, data, (e, r) => {
             if (r) {
                 setTableDataItems(r.result);
             }
@@ -37,13 +45,13 @@ export default function RequestedTrips() {
         },
         {
             name: "Origin",
-            selector: (row) => row.from.name,
+            selector: (row) => row.origin.name,
             sortable: true,
             index: 4
         },
         {
             name: "Destination",
-            selector: (row) => row.to.name,
+            selector: (row) => row.destination.name,
             sortable: true,
             index: 5
         },
@@ -54,8 +62,14 @@ export default function RequestedTrips() {
             index: 5
         },
         {
-            name: "Trip Date",
-            selector: (row) => row.tripDate,
+            name: "Requested Date",
+            selector: (row) => row.requestDate,
+            sortable: true,
+            index: 2
+        },
+        {
+            name: "Requesting User",
+            selector: (row) => row.requestingUser.name,
             sortable: true,
             index: 2
         },
