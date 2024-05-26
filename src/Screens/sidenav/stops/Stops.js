@@ -20,7 +20,7 @@ const ENDPOINT = "http://127.0.0.1:3003";
 export default function Stops() {
     const navigate = useNavigate();
     const [selectedRows, setSelectedRows] = useState([]);
-    const [userTypes, setUsersTypes] = useState([]);
+    const [userTypes, setUsersTypes] = useState([]);  
 
     // maps 
     const [defaultLocation, setDefaultLocation] = useState(DefaultLocation);
@@ -50,7 +50,7 @@ export default function Stops() {
 
     useEffect(() => {
         const socket = socketIOClient(ENDPOINT);
-        socket.on("FromAPI", data => {
+        socket.on("chatsAPI", data => {
           console.log(data);
         });
       }, []);
