@@ -29,8 +29,8 @@ export default function Bookings() {
       }
     }
 
-    post(`booking/all`, data, (e,r)=> {
-      if(r){
+    post(`booking/all`, data, (e, r) => {
+      if (r) {
         setTableDataItems(r.result);
       }
     })
@@ -64,11 +64,11 @@ export default function Bookings() {
 
     },
     {
-        name: "Destination",
-        selector: (row) => row.to.name,
-        sortable: true,
-        index: 1
-  
+      name: "Destination",
+      selector: (row) => row.to.name,
+      sortable: true,
+      index: 1
+
     },
     {
       name: "Trip Date",
@@ -83,10 +83,10 @@ export default function Bookings() {
       index: 3
     },
     {
-        name: "Luggage Opted",
-        selector: (row) => row.luggageOpted,
-        sortable: true,
-        index: 4
+      name: "Luggage Opted",
+      selector: (row) => String(row.luggageTypeOpted).toUpperCase(),
+      sortable: true,
+      index: 4
     },
     {
       name: "Refreshments Opted",
@@ -113,16 +113,34 @@ export default function Bookings() {
       index: 7
     },
     {
-        name: "Paid Amount",
-        selector: (row) => row.amountPaid,
-        sortable: true,
-        index: 8
+      name: "Paid Amount",
+      selector: (row) => row.amountPaid,
+      sortable: true,
+      index: 8
     },
     {
-        name: "Remaining Amount",
-        selector: (row) => row.amountLeft,
-        sortable: true,
-        index: 9
+      name: "Remaining Amount",
+      selector: (row) => row.amountLeft,
+      sortable: true,
+      index: 9
+    },
+    {
+      name: "Tip Amount",
+      selector: (row) => row.tipAmount,
+      sortable: true,
+      index: 9
+    },
+    {
+      name: "Rating",
+      selector: (row) => row.rating,
+      sortable: true,
+      index: 9
+    },
+    {
+      name: "Review",
+      selector: (row) => row.review,
+      sortable: true,
+      index: 9
     },
     {
       name: "Total Amount",
