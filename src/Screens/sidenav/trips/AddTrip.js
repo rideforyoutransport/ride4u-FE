@@ -326,7 +326,7 @@ export default function AddTrip() {
     }
 
     useEffect(() => {
-        if (!state || state.from != from || state.to != to || state.stops!= stops) {
+        if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
             let tempFareObj = []
             let stopsCurr = [];
             stopsCurr.push(from);
@@ -343,6 +343,10 @@ export default function AddTrip() {
                 }
             }
             setAllPossibleFares(tempFareObj);
+        } else {
+            if(state){
+                setAllPossibleFares(state.fares.fares);
+            }
         }
         console.log(allPossibleFares)
     }, [stops, from, to])
@@ -358,7 +362,7 @@ export default function AddTrip() {
     }, [returnTrip, from, to, stops])
 
     useEffect(() => {
-        if (!state || state.returnTrip.from != fromReturn || state.returnTrip.to != toReturn || state.returnTrip.stops!= stopsReturn) {
+        if (!state || (state.returnTrip && (JSON.stringify(fromReturn) !== JSON.stringify(state.returnTrip.from) || JSON.stringify(toReturn) !== JSON.stringify(state.returnTrip.to) || JSON.stringify(stopsReturn) !== JSON.stringify(state.returnTrip.stops)))) {
             let tempFareObj = []
             let stopsCurr = [];
             stopsCurr.push(fromReturn);
@@ -379,6 +383,10 @@ export default function AddTrip() {
             console.log("========tempFareObj========", tempFareObj);
             setAllPossibleFaresReturn(tempFareObj);
             console.log(allPossibleFaresReturn)
+        } else {
+            if(state){
+                setAllPossibleFaresReturn(state.returnTrip.fares.fares);
+            }
         }
     }, [fromReturn, toReturn, stopsReturn])
 
