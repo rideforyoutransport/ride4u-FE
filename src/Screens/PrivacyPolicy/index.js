@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
           Address: 63 Stewardship Rd, Brampton, ON, L7A 4W8
         </address>
 
-        <p><strong>Effective Date:</strong> [Insert Date]</p>
+        <p><strong>Effective Date:</strong> 03 June 2024</p>
 
         <p>Thank you for choosing RideForYouTransport! Your privacy is our priority.</p>
       </section>
