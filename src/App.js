@@ -4,6 +4,7 @@ import Home from "./Screens/home/Home";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "./Screens/login/Login";
 import { get } from "./utils/Crypto";
+import PrivacyPolicy from "./Screens/PrivacyPolicy";
 
 function App() {
   const [authorized, setAuthorized] = useState(() => {
@@ -15,6 +16,7 @@ function App() {
   return (
     <div>
       <Routes>
+        <Route path="/privacyPolicy" element={<PrivacyPolicy/>} />
         <Route
           path="/*"
           element={
