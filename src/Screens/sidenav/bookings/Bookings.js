@@ -125,8 +125,20 @@ export default function Bookings() {
       index: 9
     },
     {
+      name: "Payment ID",
+      selector: (row) => row.paymentID,
+      sortable: true,
+      index: 9
+    },
+    {
       name: "Tip Amount",
       selector: (row) => row.tipAmount,
+      sortable: true,
+      index: 9
+    },
+    {
+      name: "Tip Payment ID",
+      selector: (row) => row.tipPaymentID,
       sortable: true,
       index: 9
     },
