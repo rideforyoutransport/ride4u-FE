@@ -384,7 +384,7 @@ export default function AddTrip() {
             setAllPossibleFaresReturn(tempFareObj);
             console.log(allPossibleFaresReturn)
         } else {
-            if(state){
+            if(state && state.returnTrip){
                 setAllPossibleFaresReturn(state.returnTrip.fares.fares);
             }
         }
