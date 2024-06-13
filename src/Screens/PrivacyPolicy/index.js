@@ -24,6 +24,7 @@ const PrivacyPolicy = () => {
           <li>Payment Information: Credit card details, billing address.</li>
           <li>Location Information: Real-time location, trip details.</li>
           <li>Communication Information: Feedback, customer support messages.</li>
+          <li>Our app uses stripe payments. which requires information about your phone number and apps installed on the device in order to ensure secure and successful payment.</li>
         </ul>
         
         <h3>Usage Information</h3>
