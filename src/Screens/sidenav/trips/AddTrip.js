@@ -390,7 +390,10 @@ export default function AddTrip() {
         }
     }, [fromReturn, toReturn, stopsReturn])
 
-    const restrictions = { componentRestrictions: { country: 'ca' } };
+    const restrictions = {
+        types: ['geocode'],
+        componentRestrictions: {country :"ca"} ,
+      };
 
     const setFare = (event, idx) => {
         console.log(event.target.value, idx)
@@ -542,6 +545,8 @@ export default function AddTrip() {
 
                                     <div className="col-md-6 my-2">
                                         <label>Origin </label>
+                                        <div>                                        
+                                        </div>
                                         <Autocomplete
                                             apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                             className="form-control"
