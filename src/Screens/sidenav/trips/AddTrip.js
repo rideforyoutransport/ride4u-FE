@@ -65,27 +65,58 @@ export default function AddTrip() {
     const [allPossibleFares, setAllPossibleFares] = useState([]);
     const [allPossibleFaresReturn, setAllPossibleFaresReturn] = useState([])
 
+    // const checkAllRequiredValues =()=>{
+
+    //     if(vendorError==null &&  )
+    // }
 
 
 
     // errors
 
-    const [companyEmailError, setCompanyEmailError] = useState(null);
-    const [passwordError, setPasswordError] = useState(null);
-    const [passwordReError, setPasswordReError] = useState(null);
-    const [masterError, setMasterError] = useState(null);
-    const [companyMobileError, setCompanyMobileError] = useState(null);
+    const [vehicleError, setVehicleError] = useState(null);
+    const [originError, setOriginError] = useState(null);
+    const [destinationError, setDestinationError] = useState(null);
+    const [vendorError, setVendorError] = useState(null);
+    const [driverError, setDriverError] = useState(null);
+    const [tripDateError, setTripDateError] = useState(null);
+    const [totalTripAmountError, setTotalTripAmountError] = useState(null);
+    const [luggageError, setLuggageError] = useState(null);
+    const [bmaError, setBmaError] = useState(null);
+    const [returnTripDateError, setReturnTripDateError] = useState(null);
 
-    // useEffect(() => {
-    //     if (
-    //         !companyEmailError &&
-    //         !passwordError &&
-    //         !passwordReError &&
-    //         !companyMobileError
-    //     ) {
-    //         setMasterError(null);
-    //     }
-    // }, [companyEmailError, passwordError, passwordReError, companyMobileError]);
+    
+
+
+
+
+    const [masterError, setMasterError] = useState(null);
+
+    useEffect(() => {
+        if (
+            vehicleError ==null&&
+            originError ==null&&
+            destinationError ==null &&
+            vendorError ==null &&
+            driverError  ==null&&
+            tripDateError  ==null &&
+            totalTripAmountError  ==null &&
+            luggageError ==null &&
+            bmaError == null
+
+        ) {
+            setMasterError(null);
+        }else
+        setMasterError("Please Fill required Values")
+    }, [vehicleError,
+        originError,
+        destinationError,
+        vendorError,
+        driverError,
+        tripDateError,
+        totalTripAmountError,
+        luggageError,
+        bmaError]);
 
     useEffect(() => {
         let data = {
@@ -202,7 +233,7 @@ export default function AddTrip() {
         })
         setStops(stops);
         setAllPossibleFares(trip.fares.fares);
-        if(state){
+        if (state) {
             setTripDate(trip.tripDate);
         }
         if (trip.returnTrip) {
@@ -227,7 +258,7 @@ export default function AddTrip() {
             to.place_name = to.name;
             setToReturn(to);
 
-            if(state){
+            if (state) {
                 setTripDateReturn(trip.returnTrip.tripDate);
             }
         }
@@ -270,14 +301,19 @@ export default function AddTrip() {
                     } : null,
                 "fares": allPossibleFares
             }
-            patch(`trips/${state.id}`, data, (e, r) => {
-                if (r) {
-                    if (r.success) {
-                        showToast("Trip updated successfully!");
-                        navigate("/");
+            if(masterError==null || masterError ==''){
+                patch(`trips/${state.id}`, data, (e, r) => {
+                    if (r) {
+                        if (r.success) {
+                            showToast("Trip updated successfully!");
+                            navigate("/");
+                        }
                     }
-                }
-            })
+                })
+                setMasterError(null);
+            }else
+            setMasterError("Please fill required values before updating trip")
+       
         } else {
             let data = {
                 "vendor": vendor.id,
@@ -314,16 +350,26 @@ export default function AddTrip() {
                 "fares": allPossibleFares
 
             }
-            post(`trips/add`, data, (e, r) => {
-                if (r) {
-                    if (r.success) {
-                        showToast("Trip added successfully!");
-                        navigate("/");
+            if(masterError==null || masterError =='' ){
+                post(`trips/add`, data, (e, r) => {
+                    if (r) {
+                        if (r.success) {
+                            showToast("Trip added successfully!");
+                            navigate("/");
+                        }
                     }
-                }
-            })
+                })
+                setMasterError(null);
+            }else
+            {
+                setMasterError("Please fill required values before adding trip")
+                console.log(masterError);
+            }
+            
         }
     }
+
+
 
     useEffect(() => {
         if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
@@ -344,7 +390,7 @@ export default function AddTrip() {
             }
             setAllPossibleFares(tempFareObj);
         } else {
-            if(state){
+            if (state) {
                 setAllPossibleFares(state.fares.fares);
             }
         }
@@ -384,7 +430,7 @@ export default function AddTrip() {
             setAllPossibleFaresReturn(tempFareObj);
             console.log(allPossibleFaresReturn)
         } else {
-            if(state && state.returnTrip){
+            if (state && state.returnTrip) {
                 setAllPossibleFaresReturn(state.returnTrip.fares.fares);
             }
         }
@@ -392,8 +438,8 @@ export default function AddTrip() {
 
     const restrictions = {
         types: ['geocode'],
-        componentRestrictions: {country :"ca"} ,
-      };
+        componentRestrictions: { country: "ca" },
+    };
 
     const setFare = (event, idx) => {
         console.log(event.target.value, idx)
@@ -457,6 +503,11 @@ export default function AddTrip() {
         } else {
             luggage.push(event.target.value);
         }
+        if (luggage.length == 0 || luggage == '') {
+            setLuggageError('Please select a Luggage');
+        } else {
+            setLuggageError(null);
+        }
     };
 
 
@@ -467,7 +518,9 @@ export default function AddTrip() {
             tempVehicle.name = (vehicles.find((o => o.id === event.target.value))).name;
             tempVehicle.id = event.target.value;
             setVehicle(tempVehicle);
-        }
+            setVehicleError(null);
+        } else
+            setVehicleError('Please Select a vehicle');
     };
     const handleTripSelect = async (event) => {
         event.preventDefault();
@@ -484,6 +537,9 @@ export default function AddTrip() {
             tempVendor.name = (vendors.find((o => o.id === event.target.value))).name;
             tempVendor.id = event.target.value;
             setVendor(tempVendor);
+            setVendorError(null);
+        } else {
+            setVendorError('Please select a vendor');
         }
     };
     const handleDriverChange = async (event) => {
@@ -493,17 +549,48 @@ export default function AddTrip() {
             tempDriver.name = (drivers.find((o => o.id === event.target.value))).name;
             tempDriver.id = event.target.value;
             setDriver(tempDriver);
-        }
+            setDriverError(null)
+        } else
+            setDriverError('Please Select a Driver')
     };
     const handleRefreshmentChange = async (event) => {
         event.preventDefault();
         setRefreshments(event.target.value);
     };
 
+    const handleLocationChange = (e, loc) => {
+        if (loc == 'origin') {
+            if (e.target.value == '' || e.target.value == null) {
+                setOriginError('Please select a Trip Start Location')
+            } else {
+                setOriginError(null)
+            }
+        }
+        if (loc == 'destination') {
+            if (e.target.value == '' || e.target.value == null) {
+                setOriginError('Please select a Trip End Location')
+            } else {
+                setDestinationError(null)
+            }
+        }
+
+    }
+
     const handleReturnTrip = async (event) => {
         event.preventDefault();
         setReturnTrip((prevVal) => !prevVal);
     };
+
+
+    const setMasterErrorMessage = () => {
+
+        // if (trainername.length === 0)
+        //     setNameError('* Name is required');
+        //   else if (!/^[a-zA-Z\s]*$/.test(trainername)) {
+        //       setNameError('* Only characters and spaces allowed')
+        //   }
+        //   else setNameError(null);
+    }
 
     return (
         <div className="page-content">
@@ -522,10 +609,14 @@ export default function AddTrip() {
                                             onChange={handleVendorChange}
                                             value={vendor.id}
                                         >
+                                            <option value=''>Select Vendor</option>
                                             {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
                                         </select>
-
+                                        {vendorError && (
+                                            <p className="text-danger mx-2 my-2">{vendorError}</p>
+                                        )}
                                     </div>
+
                                 </div>
                                 {state ? null : <div className="form-group row">
 
@@ -545,7 +636,7 @@ export default function AddTrip() {
 
                                     <div className="col-md-6 my-2">
                                         <label>Origin </label>
-                                        <div>                                        
+                                        <div>
                                         </div>
                                         <Autocomplete
                                             apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
@@ -563,10 +654,11 @@ export default function AddTrip() {
                                                 setFrom(from);
                                                 console.log(from);
                                             }}
+                                            onChange={(e) => handleLocationChange(e, 'origin')}
                                         />
-
-
-
+                                        {originError && (
+                                            <p className="text-danger mx-2 my-2">{originError}</p>
+                                        )}
                                     </div>
 
                                     <div className="col-md-6 my-2">
@@ -579,6 +671,7 @@ export default function AddTrip() {
                                             type="text"
                                             options={restrictions}
                                             value={to.name}
+                                            onChange={(e) => handleLocationChange(e, 'destination')}
                                             onPlaceSelected={(place) => {
 
                                                 var lng = place.geometry.location.lng();
@@ -591,6 +684,9 @@ export default function AddTrip() {
 
                                             }}
                                         />
+                                        {destinationError && (
+                                            <p className="text-danger mx-2 my-2">{destinationError}</p>
+                                        )}
                                     </div>
 
 
@@ -653,6 +749,10 @@ export default function AddTrip() {
                                             <option value={'l'}>Large</option>
 
                                         </select>
+                                        {luggageError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{luggageError}</p>
+                                            )}
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Vehicle</label>
@@ -662,6 +762,9 @@ export default function AddTrip() {
                                             onChange={handleVehicleChange}>
                                             {vehicles?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
+                                        {vehicleError && (
+                                            <p className="text-danger mx-2 my-2">{vehicleError}</p>
+                                        )}
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Driver</label>
@@ -671,6 +774,9 @@ export default function AddTrip() {
                                             onChange={handleDriverChange}>
                                             {drivers.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
+                                        {driverError && (
+                                            <p className="text-danger mx-2 my-2">{driverError}</p>
+                                        )}
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Refreshments </label>
@@ -681,6 +787,7 @@ export default function AddTrip() {
                                             <option value={'true'}>True</option>
                                             <option value={'false'}>False</option>
                                         </select>
+
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Return Trip</label>
@@ -701,8 +808,17 @@ export default function AddTrip() {
                                             name="m_no"
                                             type="number"
                                             value={bookingMinimumAmount}
-                                            onChange={(e) => setBookingMinimumAmount(e.target.value)}
+                                            onChange={(e) => {
+                                                setBookingMinimumAmount(e.target.value)
+                                                if (e.target.value < 25) {
+                                                    setBmaError("Minimum booking amount is 25")
+                                                } else
+                                                    setBmaError(null)
+                                            }}
                                         />
+                                        {bmaError && (
+                                            <p className="text-danger mx-2 my-2">{bmaError}</p>
+                                        )}
                                     </div>
 
                                     <div className="col-md-12 my-12">
@@ -747,11 +863,21 @@ export default function AddTrip() {
                                                 <DemoItem>
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDate)).format("YYYY-MM-DDTHH:mm"))}
-                                                        onChange={(e) => setTripDate(e.$d.toISOString())}
+                                                        onChange={(e) =>{ 
+                                                          
+                                                            setTripDate(e.$d.toISOString())
+                                                            if(tripDate==''|| tripDate==null){
+                                                                setTripDateError("Please select a trip Date")
+                                                            }else
+                                                            setTripDateError(null);
+                                                        }}
                                                     />
                                                 </DemoItem>
                                             </DemoContainer>
                                         </LocalizationProvider>
+                                        {tripDateError && (
+                                            <p className="text-danger mx-2 my-2">{tripDateError}</p>
+                                        )}
 
                                     </div>
 
@@ -891,11 +1017,20 @@ export default function AddTrip() {
                                                 <DemoItem>
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDateReturn)).format("YYYY-MM-DDTHH:mm"))}
-                                                        onChange={(e) => setTripDateReturn(e.$d.toISOString())}
+                                                        onChange={(e) =>{ 
+                                                            setTripDateReturn(e.$d.toISOString())
+                                                            if(tripDate==''|| tripDate==null){
+                                                                setReturnTripDateError("Please select a trip Date")
+                                                            }else
+                                                            setReturnTripDateError(null);
+                                                        }}
                                                     />
                                                 </DemoItem>
                                             </DemoContainer>
                                         </LocalizationProvider>
+                                        {returnTripDateError && (
+                                            <p className="text-danger mx-2 my-2">{returnTripDateError}</p>
+                                        )}
 
                                     </div>
 
@@ -912,11 +1047,20 @@ export default function AddTrip() {
                                         Submit
                                     </button>
                                 </div>
+                                
                             </div>
-
+                            <div className="row">
+                            <div className="col-md-5"></div>
+                            <div className="col-md-6">
                             {masterError && (
                                 <p className="text-danger mx-2 my-2">{masterError}</p>
                             )}
+                            </div>
+                           
+                            </div>
+                           
+
+                           
                         </div>
                     </div>
                 </div>
