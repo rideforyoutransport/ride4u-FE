@@ -383,7 +383,8 @@ export default function AddTrip() {
                     let element = {
                         "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                         "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                        "fare": 0
+                        "fare": 0,
+                        hidden:false
                     }
                     tempFareObj.push(element);
                 }
@@ -448,6 +449,18 @@ export default function AddTrip() {
         allPossibleFaresTemp[idx].fare = event.target.value;
         setAllPossibleFares(allPossibleFaresTemp);
         console.log({ allPossibleFares });
+    }
+
+    const updateHiddenFares = (idx,returnTrip) => {
+        if(returnTrip){
+            let allPossibleFaresTemp = [...allPossibleFaresReturn];
+            allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
+            setAllPossibleFaresReturn(allPossibleFaresTemp);
+        }else{
+            let allPossibleFaresTemp = [...allPossibleFares];
+            allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
+            setAllPossibleFares(allPossibleFaresTemp);
+        }
     }
 
     const setFareReturn = (event, idx) => {
@@ -836,17 +849,24 @@ export default function AddTrip() {
                                             {allPossibleFares?.map((key, idx) => (
 
                                                 <tbody>
-                                                    <tr>
+                                                    <tr hidden={key.hidden}>
                                                         <th scope="row" key={idx}>{idx + 1}</th>
                                                         <td>{key.from.name}</td>
                                                         <td>{key.to.name}</td>
-                                                        <input
-
-                                                            className="form-control"
-                                                            type="number"
-                                                            value={key.fare}
-                                                            onChange={(e) => setFare(e, idx)}
-                                                        />
+                                                        <td><input
+                                                        className="form-control"
+                                                        type="number"
+                                                        value={key.fare}
+                                                        onChange={(e) => setFare(e, idx)}
+                                                    /></td>
+                                                        <td>
+                                                        <button
+                                                        className="btn btn-danger mr-2 w-100"
+                                                        onClick={() => updateHiddenFares(idx,false)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                        </td>
                                                     </tr>
 
                                                 </tbody>
@@ -991,21 +1011,31 @@ export default function AddTrip() {
                                             </thead>
                                             {allPossibleFaresReturn?.map((key, idx) => (
 
+                                    
                                                 <tbody>
-                                                    <tr>
-                                                        <th scope="row" key={idx}>{idx + 1}</th>
-                                                        <td>{key.from.name}</td>
-                                                        <td>{key.to.name}</td>
-                                                        <input
+                                                <tr hidden={key.hidden}>
+                                                    <th scope="row" key={idx}>{idx + 1}</th>
+                                                    <td>{key.from.name}</td>
+                                                    <td>{key.to.name}</td>
+                                                    <td><input
 
-                                                            className="form-control"
-                                                            type="number"
-                                                            value={key.fare}
-                                                            onChange={(e) => setFareReturn(e, idx)}
-                                                        />
-                                                    </tr>
+                                                    className="form-control"
+                                                    type="number"
+                                                    value={key.fare}
+                                                    onChange={(e) => setFareReturn(e, idx)}
+                                                /></td>
+                                                    <td>
+                                                    <button
+                                                    className="btn btn-danger mr-2 w-100"
+                                                    onClick={() => updateHiddenFares(idx,true)}
+                                                >
+                                                    Delete
+                                                </button>
+                                                    </td>
+                                                </tr>
 
-                                                </tbody>
+                                            </tbody>
+
                                             ))}
                                         </table>
                                     </div>
