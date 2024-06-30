@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import axios, { all } from "axios";
 import validator from "validator";
 import { useNavigate } from "react-router-dom";
 import Autocomplete from "react-google-autocomplete";
@@ -19,6 +19,7 @@ import Stack from '@mui/material/Stack';
 import { showToast } from "../../../utils/Toast";
 import dayjs from "dayjs";
 import moment from "moment";
+import toast from "react-hot-toast";
 
 
 
@@ -84,8 +85,12 @@ export default function AddTrip() {
     const [luggageError, setLuggageError] = useState(null);
     const [bmaError, setBmaError] = useState(null);
     const [returnTripDateError, setReturnTripDateError] = useState(null);
+    const [stopsValueTemp, setStopsValueTemp] = useState('');
+    const [fareError, setFareError] = useState(null);
+    const [fareReturnError, setFareReturnError] = useState(null);
 
-    
+
+
 
 
 
@@ -94,20 +99,21 @@ export default function AddTrip() {
 
     useEffect(() => {
         if (
-            vehicleError ==null&&
-            originError ==null&&
-            destinationError ==null &&
-            vendorError ==null &&
-            driverError  ==null&&
-            tripDateError  ==null &&
-            totalTripAmountError  ==null &&
-            luggageError ==null &&
-            bmaError == null
+            vehicleError == null &&
+            originError == null &&
+            destinationError == null &&
+            vendorError == null &&
+            driverError == null &&
+            tripDateError == null &&
+            totalTripAmountError == null &&
+            luggageError == null &&
+            bmaError == null &&
+            checkZeroFare()
 
         ) {
             setMasterError(null);
-        }else
-        setMasterError("Please Fill required Values")
+        } else
+            setMasterError("Please Fill required Values")
     }, [vehicleError,
         originError,
         destinationError,
@@ -116,7 +122,9 @@ export default function AddTrip() {
         tripDateError,
         totalTripAmountError,
         luggageError,
-        bmaError]);
+        bmaError,
+        fareError,
+        fareReturnError]);
 
     useEffect(() => {
         let data = {
@@ -282,6 +290,7 @@ export default function AddTrip() {
                 "tripDescription": tripDiscription,
                 "totalTripAmount": totalTripAmount,
                 "refreshments": refreshments,
+
                 "returnTrip": returnTrip ?
                     {
                         "isReturnTrip": true,
@@ -301,7 +310,7 @@ export default function AddTrip() {
                     } : null,
                 "fares": allPossibleFares
             }
-            if(masterError==null || masterError ==''){
+            if ((masterError == null || masterError == '') && checkZeroFare()) {
                 patch(`trips/${state.id}`, data, (e, r) => {
                     if (r) {
                         if (r.success) {
@@ -311,9 +320,9 @@ export default function AddTrip() {
                     }
                 })
                 setMasterError(null);
-            }else
-            setMasterError("Please fill required values before updating trip")
-       
+            } else
+                setMasterError("Please fill required values before updating trip")
+
         } else {
             let data = {
                 "vendor": vendor.id,
@@ -350,7 +359,7 @@ export default function AddTrip() {
                 "fares": allPossibleFares
 
             }
-            if(masterError==null || masterError =='' ){
+            if ((masterError == null || masterError == '') && checkZeroFare()) {
                 post(`trips/add`, data, (e, r) => {
                     if (r) {
                         if (r.success) {
@@ -360,12 +369,12 @@ export default function AddTrip() {
                     }
                 })
                 setMasterError(null);
-            }else
-            {
+            } else {
                 setMasterError("Please fill required values before adding trip")
                 console.log(masterError);
+                console.log(checkZeroFare());
             }
-            
+
         }
     }
 
@@ -380,12 +389,25 @@ export default function AddTrip() {
             stopsCurr.push(to);
             for (let index = 0; index < stopsCurr.length; index++) {
                 for (let j = index + 1; j < stopsCurr.length; j++) {
-                    let element = {
-                        "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                        "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                        "fare": 0,
-                        hidden:false
+                    let element=null;
+                    if(stopsCurr[index].place_id==from.place_id  && stopsCurr[j].place_id == to.place_id){
+                         element = {
+                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                            "fare": 1,
+                            hidden: false,
+                            master:true
+                        }
+                    }else{
+                         element = {
+                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                            "fare": 0,
+                            hidden: false,
+                            master:false
+                        }
                     }
+                   
                     tempFareObj.push(element);
                 }
             }
@@ -415,15 +437,27 @@ export default function AddTrip() {
             stopsCurr.push(fromReturn);
             stopsCurr.push(...stopsReturn);
             stopsCurr.push(toReturn);
-            console.log("========stopscurr========", stopsCurr);
             for (let index = 0; index < stopsCurr.length; index++) {
                 for (let j = index + 1; j < stopsCurr.length; j++) {
-                    let element = {
-                        "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                        "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                        "fare": 0
+                    let element =null;
+                    if(stopsCurr[index].place_id==fromReturn.place_id  && stopsCurr[j].place_id == toReturn.place_id){
+                        element = {
+                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                            "fare": 1,
+                            "hidden":false,
+                            "master":true
+                        }
+                    }else{
+                        element = {
+                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                            "fare": 0,
+                            "hidden":false,
+                            "master":false
+                        }
                     }
-                    console.log("========element========", element);
+                    
                     tempFareObj.push(element);
                 }
             }
@@ -448,19 +482,50 @@ export default function AddTrip() {
         console.log({ allPossibleFaresTemp })
         allPossibleFaresTemp[idx].fare = event.target.value;
         setAllPossibleFares(allPossibleFaresTemp);
+        if (checkZeroFare()) {
+            setFareError(null);
+            setMasterError(null);
+
+        } else {
+            setFareError("Please Update fares")
+        }
         console.log({ allPossibleFares });
+
     }
 
-    const updateHiddenFares = (idx,returnTrip) => {
-        if(returnTrip){
+    const updateHiddenFares = (idx, returnTrip) => {
+        if (returnTrip) {
             let allPossibleFaresTemp = [...allPossibleFaresReturn];
             allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
             setAllPossibleFaresReturn(allPossibleFaresTemp);
-        }else{
+        } else {
             let allPossibleFaresTemp = [...allPossibleFares];
             allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
             setAllPossibleFares(allPossibleFaresTemp);
         }
+    }
+
+    const checkZeroFare = () => {
+
+        let masterFare = false;
+        for (let index = 0; index < allPossibleFares.length; index++) {
+            const element = allPossibleFares[index];
+            if(element.master && element.fare>0)
+                masterFare = true;
+        }
+
+       
+        if (returnTrip) {
+            let masterFareReturn = false;
+            for (let index = 0; index < allPossibleFares.length; index++) {
+                const element = allPossibleFares[index];
+                if(element.master && element.fare>0)
+                    masterFareReturn = true;
+            }
+            return masterFare && masterFareReturn;
+        }
+
+        return masterFare;
     }
 
     const setFareReturn = (event, idx) => {
@@ -469,7 +534,14 @@ export default function AddTrip() {
         console.log({ allPossibleFaresTemp })
         allPossibleFaresTemp[idx].fare = event.target.value;
         setAllPossibleFaresReturn(allPossibleFaresTemp);
-        console.log({ allPossibleFaresReturn });
+        if (checkZeroFare()) {
+            setFareReturnError(null)
+            setMasterError(null);
+        } else {
+            setFareReturnError("Please Update fares")
+        }
+
+
     }
 
     const removeFromStops = (e, key) => {
@@ -496,6 +568,7 @@ export default function AddTrip() {
             let stopsObj = { lat, lng, place_id, place_name };
             setStops((prevStop) => [...prevStop, stopsObj]);
         }
+
     }, [stops]);
 
     const handleLocationSelectedReturn = useCallback((place) => {
@@ -605,6 +678,13 @@ export default function AddTrip() {
         //   else setNameError(null);
     }
 
+    const handleStopsValueChange = (e, action) => {
+        if (action == 'add') {
+            setStopsValueTemp(e.target.value);
+        } else if (action == 'update') {
+            setStopsValueTemp('');
+        }
+    }
     return (
         <div className="page-content">
             <div className="row">
@@ -731,6 +811,9 @@ export default function AddTrip() {
                                                 onPlaceSelected={(place) => {
                                                     handleLocationSelected(place);
                                                 }}
+                                                onChange={(e) => handleStopsValueChange(e, "add")}
+                                                value={stopsValueTemp}
+                                                onClick={(e) => handleStopsValueChange(e, "update")}
                                             />
 
                                         </label>
@@ -851,26 +934,31 @@ export default function AddTrip() {
                                                 <tbody>
                                                     <tr hidden={key.hidden}>
                                                         <th scope="row" key={idx}>{idx + 1}</th>
-                                                        <td>{key.from.name}</td>
-                                                        <td>{key.to.name}</td>
+                                                        <td className={key.master?"h1":""}>{key.from.name}</td>
+                                                        <td className={key.master?"h1":""}>{key.to.name}</td>
                                                         <td><input
-                                                        className="form-control"
-                                                        type="number"
-                                                        value={key.fare}
-                                                        onChange={(e) => setFare(e, idx)}
-                                                    /></td>
+                                                            className="form-control"
+                                                            type="number"
+                                                            value={key.fare}
+                                                            min={key.master?1:0}
+                                                            onChange={(e) => setFare(e, idx)}
+                                                        /></td>
                                                         <td>
-                                                        <button
-                                                        className="btn btn-danger mr-2 w-100"
-                                                        onClick={() => updateHiddenFares(idx,false)}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                            <button
+                                                                className="btn btn-danger mr-2 w-100"
+                                                                onClick={() => updateHiddenFares(idx, false)}
+                                                                disabled={key.master}
+                                                            >
+                                                                Delete
+                                                            </button>
                                                         </td>
                                                     </tr>
 
                                                 </tbody>
                                             ))}
+                                            {fareError && (
+                                                <p className="text-danger mx-2 my-2">{fareError}</p>
+                                            )}
                                         </table>
 
                                     </div>
@@ -883,13 +971,13 @@ export default function AddTrip() {
                                                 <DemoItem>
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDate)).format("YYYY-MM-DDTHH:mm"))}
-                                                        onChange={(e) =>{ 
-                                                          
+                                                        onChange={(e) => {
+
                                                             setTripDate(e.$d.toISOString())
-                                                            if(tripDate==''|| tripDate==null){
+                                                            if (tripDate == '' || tripDate == null) {
                                                                 setTripDateError("Please select a trip Date")
-                                                            }else
-                                                            setTripDateError(null);
+                                                            } else
+                                                                setTripDateError(null);
                                                         }}
                                                     />
                                                 </DemoItem>
@@ -1011,32 +1099,36 @@ export default function AddTrip() {
                                             </thead>
                                             {allPossibleFaresReturn?.map((key, idx) => (
 
-                                    
+
                                                 <tbody>
-                                                <tr hidden={key.hidden}>
-                                                    <th scope="row" key={idx}>{idx + 1}</th>
-                                                    <td>{key.from.name}</td>
-                                                    <td>{key.to.name}</td>
-                                                    <td><input
+                                                    <tr hidden={key.hidden}>
+                                                        <th scope="row" key={idx}>{idx + 1}</th>
 
-                                                    className="form-control"
-                                                    type="number"
-                                                    value={key.fare}
-                                                    onChange={(e) => setFareReturn(e, idx)}
-                                                /></td>
-                                                    <td>
-                                                    <button
-                                                    className="btn btn-danger mr-2 w-100"
-                                                    onClick={() => updateHiddenFares(idx,true)}
-                                                >
-                                                    Delete
-                                                </button>
-                                                    </td>
-                                                </tr>
+                                                        <td className={key.master?"h1":""}>{key.from.name}</td>
+                                                        <td className={key.master?"h1":""}>{key.to.name}</td>
+                                                        <td><input
 
-                                            </tbody>
+                                                            className="form-control"
+                                                            type="number"
+                                                            min={key.master?1:0}
+                                                            value={key.fare}
+                                                            onChange={(e) => setFareReturn(e, idx)}
+                                                        /></td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-danger mr-2 w-100"
+                                                                onClick={() => updateHiddenFares(idx, true)}
+                                                                disabled={key.master}
+                                                            >Delete</button>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
 
                                             ))}
+                                            {fareError && (
+                                                <p className="text-danger mx-2 my-2">{fareError}</p>
+                                            )}
                                         </table>
                                     </div>
                                     <div className="col-md-6 my-3">
@@ -1047,12 +1139,12 @@ export default function AddTrip() {
                                                 <DemoItem>
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDateReturn)).format("YYYY-MM-DDTHH:mm"))}
-                                                        onChange={(e) =>{ 
+                                                        onChange={(e) => {
                                                             setTripDateReturn(e.$d.toISOString())
-                                                            if(tripDate==''|| tripDate==null){
+                                                            if (tripDate == '' || tripDate == null) {
                                                                 setReturnTripDateError("Please select a trip Date")
-                                                            }else
-                                                            setReturnTripDateError(null);
+                                                            } else
+                                                                setReturnTripDateError(null);
                                                         }}
                                                     />
                                                 </DemoItem>
@@ -1077,20 +1169,20 @@ export default function AddTrip() {
                                         Submit
                                     </button>
                                 </div>
-                                
+
                             </div>
                             <div className="row">
-                            <div className="col-md-5"></div>
-                            <div className="col-md-6">
-                            {masterError && (
-                                <p className="text-danger mx-2 my-2">{masterError}</p>
-                            )}
-                            </div>
-                           
-                            </div>
-                           
+                                <div className="col-md-5"></div>
+                                <div className="col-md-6">
+                                    {masterError && (
+                                        <p className="text-danger mx-2 my-2">{masterError}</p>
+                                    )}
+                                </div>
 
-                           
+                            </div>
+
+
+
                         </div>
                     </div>
                 </div>

@@ -15,6 +15,27 @@ export default function AddDriver() {
     const [vendor, setVendor] = useState('');
     const { state } = useLocation();
 
+    const [nameError, setNameError] = useState(null);
+    const [emailError, setEmailError] = useState(null);
+    const [vendorError, setVendorError] = useState(null);
+    const [numberError, setNumberError] = useState(null);
+    const [masterError, setMasterError] = useState(null);
+
+
+    useEffect(() => {
+        if (
+            nameError == null &&
+            numberError == null &&
+            vendorError == null &&
+            emailError == null
+
+
+        ) {
+            setMasterError(null);
+        } else
+            setMasterError("Please Fill required Values")
+    }, [nameError, numberError, vendorError, emailError]);
+
     useEffect(() => {
         console.log(state);
         post(`vendor/all`, {}, (e, r2) => {
@@ -48,14 +69,19 @@ export default function AddDriver() {
                 email,
                 vendorId: vendor.id
             }
-            patch(`driver/${state.id}`, data, (e, r) => {
-                if (r) {
-                    if (r.success) {
-                        showToast("Driver updated successfully!");
-                        navigate("/drivers");
+            if (masterError == null || masterError == '') {
+                patch(`driver/${state.id}`, data, (e, r) => {
+                    if (r) {
+                        if (r.success) {
+                            showToast("Driver updated successfully!");
+                            navigate("/drivers");
+                        }
                     }
-                }
-            })
+                })
+            } else {
+                setMasterError("Please fill required values before updating trip")
+
+            }
         } else {
             let data = {
                 name,
@@ -65,16 +91,61 @@ export default function AddDriver() {
                 passwordConfirm: `${name}@2024`,
                 vendorId: vendor.id
             }
-            post(`driver/add`, data, (e, r) => {
-                if (r) {
-                    if (r.success) {
-                        showToast("Driver added successfully!");
-                        navigate("/drivers");
+            if (masterError == null || masterError == '') {
+                post(`driver/add`, data, (e, r) => {
+                    if (r) {
+                        if (r.success) {
+                            showToast("Driver added successfully!");
+                            navigate("/drivers");
+                        }
                     }
-                }
-            })
+                })
+            }
+            else {
+                setMasterError("Please fill required values before updating trip")
+
+            }
         }
     }
+
+    const handleNameChange = (e) => {
+        if (e.target.value == '') {
+            setNameError('Please Enter a name');
+        } else {
+            setNameError(null);
+        }
+        setName(e.target.value);
+    }
+    const handleEmailChange = (e) => {
+        if (e.target.value == '') {
+            setEmailError('Please Enter a Email');
+        } else {
+            setEmailError(null);
+        }
+        setEmail(e.target.value);
+    }
+    const handleNumberChange = (e) => {
+        if (e.target.value == '') {
+            setNumberError('Please Enter a Phone No ');
+        }
+        else {
+            setNumberError(null);
+        }
+        setNumber(e.target.value);
+    }
+
+    const handleVendorChange = async (event) => {
+        event.preventDefault();
+        if (event.target.value != '') {
+            let tempVendor = {};
+            tempVendor.name = (vendors.find((o => o.id === event.target.value))).name;
+            tempVendor.id = event.target.value;
+            setVendor(tempVendor);
+            setVendorError(null);
+        } else {
+            setVendorError('Please select a vendor');
+        }
+    };
 
     return (
         <div className="page-content">
@@ -86,17 +157,20 @@ export default function AddDriver() {
                             <div className="cmxform">
                                 <div className="form-group row">
 
+
                                     <div className="col-md-6 my-3">
                                         <label>Vendor</label>
                                         <select
                                             className="js-example-basic-single w-100"
-                                            value={vendor}
-                                            onChange={(e) => {
-                                                setVendor(e.target.value);
-                                            }}
-                                        >{vendors.map((key) => <option value={key.id}>{key.name}</option>)}
+                                            onChange={handleVendorChange}
+                                            value={vendor.id}
+                                        >
+                                            <option value=''>Select Vendor</option>
+                                            {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
                                         </select>
-
+                                        {vendorError && (
+                                            <p className="text-danger mx-2 my-2">{vendorError}</p>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="form-group row">
@@ -108,10 +182,12 @@ export default function AddDriver() {
                                             name="m_no"
                                             type="text"
                                             value={name}
-                                            onChange={(e) => {
-                                                setName(e.target.value);
-                                            }}
+                                            onChange={handleNameChange}
                                         />
+                                        {nameError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{nameError}</p>
+                                            )}
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -124,10 +200,14 @@ export default function AddDriver() {
                                             maxLength={10}
                                             minLength={10}
                                             value={number}
-                                            onChange={(e) => {
-                                                setNumber(e.target.value)
-                                            }}
+                                            onChange={handleNumberChange}
+
                                         />
+                                        {numberError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{numberError}</p>
+                                            )}
+
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -138,10 +218,12 @@ export default function AddDriver() {
                                             name="m_no"
                                             type="email"
                                             value={email}
-                                            onChange={(e) => {
-                                                setEmail(e.target.value)
-                                            }}
+                                            onChange={handleEmailChange}
                                         />
+                                        {emailError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{emailError}</p>
+                                            )}
                                     </div>
 
                                 </div>
@@ -159,9 +241,9 @@ export default function AddDriver() {
                                     </div>
                                 </div>
                             </div>
-                            {/* {masterError && (
+                            {masterError && (
                                 <p className="text-danger mx-2 my-2">{masterError}</p>
-                            )} */}
+                            )}
                         </div>
                     </div>
                 </div>

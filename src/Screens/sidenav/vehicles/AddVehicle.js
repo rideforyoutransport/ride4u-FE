@@ -21,18 +21,38 @@ export default function AddVehicle() {
     const [seats, setSeats] = useState(0);
     const { state } = useLocation();
 
+    const [nameError, setNameError] = useState(null);
+    const [seatsError, setSeatsError] = useState(null);
+    const [vendorError, setVendorError] = useState(null);
+    const [numberError, setNumberError] = useState(null);
+    const [masterError, setMasterError] = useState(null);
+
+
+    useEffect(() => {
+        if (
+            nameError == null &&
+            numberError == null &&
+            vendorError == null &&
+            seatsError == null
+
+
+        ) {
+            setMasterError(null);
+        } else
+            setMasterError("Please Fill required Values")
+    }, [nameError, numberError, vendorError, seatsError]);
     useEffect(() => {
         console.log(state);
         post(`vendor/all`, {}, (e, r2) => {
             if (r2) {
                 setVendors(r2.result.items);
-                if(state){
+                if (state) {
                     setName(state.name);
                     setNumber(state.number);
                     setSeats(state.totalSeats);
                     let vendorTemp = {};
                     r2.result.items.array.forEach(element => {
-                        if(element.id == state.vendor[0].id){
+                        if (element.id == state.vendor[0].id) {
                             vendorTemp = element;
                         }
                     });
@@ -54,19 +74,19 @@ export default function AddVehicle() {
             vendor: vendor.id
         }
 
-        if(state){
-            patch(`vehicle/${state.id}`, data, (e,r)=> {
-                if(r){
-                    if(r.success){
+        if (state) {
+            patch(`vehicle/${state.id}`, data, (e, r) => {
+                if (r) {
+                    if (r.success) {
                         showToast("Vehicle updated successfully!");
                         navigate("/vehicles");
                     }
                 }
             })
         } else {
-            post(`vehicle/add`, data, (e,r)=> {
-                if(r){
-                    if(r.success){
+            post(`vehicle/add`, data, (e, r) => {
+                if (r) {
+                    if (r.success) {
                         showToast("Vehicle added successfully!");
                         navigate("/vehicles");
                     }
@@ -75,28 +95,69 @@ export default function AddVehicle() {
         }
     }
 
+    const handleNameChange = (e) => {
+        if (e.target.value == '') {
+            setNameError('Please Enter a name');
+        } else {
+            setNameError(null);
+        }
+        setName(e.target.value);
+    }
+    const handleSeatsChange = (e) => {
+        if (e.target.value == '' || e.target.value==0 || e.target.value<0) {
+            setSeatsError('Seats should be more than 0 or non null');
+        } else {
+            setSeatsError(null);
+        }
+        setSeats(e.target.value);
+    }
+    const handleNumberChange = (e) => {
+        if (e.target.value == '') {
+            setNumberError('Please Enter a Vehicle No ');
+        }
+        else {
+            setNumberError(null);
+        }
+        setNumber(e.target.value);
+    }
+
+    const handleVendorChange = async (event) => {
+        event.preventDefault();
+        if (event.target.value != '') {
+            let tempVendor = {};
+            tempVendor.name = (vendors.find((o => o.id === event.target.value))).name;
+            tempVendor.id = event.target.value;
+            setVendor(tempVendor);
+            setVendorError(null);
+        } else {
+            setVendorError('Please select a vendor');
+        }
+    };
+
+
     return (
         <div className="page-content">
             <div className="row">
                 <div className="col-lg-12 grid-margin stretch-card">
                     <div className="card">
                         <div className="card-body">
-                            <h4 className="card-title">{state? 'Edit Vehicle': 'Add Vehicle'}</h4>
+                            <h4 className="card-title">{state ? 'Edit Vehicle' : 'Add Vehicle'}</h4>
                             <div className="cmxform">
                                 <div className="form-group row">
-
-                                    <div className="col-md-6 my-3">
-                                        <label>Vendor</label>
-                                        <select
-                                            className="js-example-basic-single w-100"
-                                            value={vendor}
-                                            onChange={(e) => {
-                                                setVendor(e.target.value);
-                                            }}
-                                        >{vendors.map((key) => <option value={key.id}>{key.name}</option>)}
-                                        </select>
-
-                                    </div>
+                                <div className="col-md-6 my-3">
+                                <label>Vendor</label>
+                                <select
+                                    className="js-example-basic-single w-100"
+                                    onChange={handleVendorChange}
+                                    value={vendor.id}
+                                >
+                                    <option value=''>Select Vendor</option>
+                                    {vendors.map((key) => <option value={key.id}>{key.name}</option>)}
+                                </select>
+                                {vendorError && (
+                                    <p className="text-danger mx-2 my-2">{vendorError}</p>
+                                )}
+                            </div>
                                 </div>
                                 <div className="form-group row">
                                     <div className="col-md-6 my-3">
@@ -107,10 +168,11 @@ export default function AddVehicle() {
                                             name="m_no"
                                             type="text"
                                             value={name}
-                                            onChange={(e) => {
-                                                setName(e.target.value);
-                                            }}
+                                            onChange={handleNameChange}
                                         />
+                                        {nameError && (
+                                            <p className="text-danger mx-2 my-2">{nameError}</p>
+                                        )}
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -121,10 +183,11 @@ export default function AddVehicle() {
                                             name="m_no"
                                             type="text"
                                             value={number}
-                                            onChange={(e) => {
-                                                setNumber(e.target.value)
-                                            }}
+                                            onChange={handleNumberChange}
                                         />
+                                        {numberError && (
+                                            <p className="text-danger mx-2 my-2">{numberError}</p>
+                                        )}
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -135,10 +198,11 @@ export default function AddVehicle() {
                                             name="m_no"
                                             type="number"
                                             value={seats}
-                                            onChange={(e) => {
-                                                setSeats(e.target.value)
-                                            }}
+                                            onChange={handleSeatsChange}
                                         />
+                                        {seatsError && (
+                                            <p className="text-danger mx-2 my-2">{seatsError}</p>
+                                        )}
                                     </div>
 
                                 </div>
@@ -156,9 +220,9 @@ export default function AddVehicle() {
                                     </div>
                                 </div>
                             </div>
-                            {/* {masterError && (
+                            {masterError && (
                                 <p className="text-danger mx-2 my-2">{masterError}</p>
-                            )} */}
+                            )}
                         </div>
                     </div>
                 </div>

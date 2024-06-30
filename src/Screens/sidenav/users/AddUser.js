@@ -13,6 +13,27 @@ export default function AddUser() {
     const [number, setNumber] = useState('');
     const { state } = useLocation();
 
+
+    const [nameError, setNameError] = useState(null);
+    const [emailError, setEmailError] = useState(null);
+    const [numberError, setNumberError] = useState(null);
+    const [masterError, setMasterError] = useState(null);
+
+    useEffect(() => {
+        if (
+            nameError == null &&
+            numberError == null &&
+            emailError == null
+
+
+        ) {
+            setMasterError(null);
+        } else
+            setMasterError("Please Fill required Values")
+    }, [nameError, numberError, emailError]);
+
+
+
     useEffect(() => {
         console.log(state);
         if(state){
@@ -58,6 +79,33 @@ export default function AddUser() {
         }
     }
 
+
+    const handleNameChange = (e) => {
+        if (e.target.value == '') {
+            setNameError('Please Enter a name');
+        } else {
+            setNameError(null);
+        }
+        setName(e.target.value);
+    }
+    const handleEmailChange = (e) => {
+        if (e.target.value == '') {
+            setEmailError('Please Enter a Email');
+        } else {
+            setEmailError(null);
+        }
+        setEmail(e.target.value);
+    }
+    const handleNumberChange = (e) => {
+        if (e.target.value == '') {
+            setNumberError('Please Enter a Phone No ');
+        }
+        else {
+            setNumberError(null);
+        }
+        setNumber(e.target.value);
+    }
+
     return (
         <div className="page-content">
             <div className="row">
@@ -75,26 +123,31 @@ export default function AddUser() {
                                             name="m_no"
                                             type="text"
                                             value={name}
-                                            onChange={(e) => {
-                                                setName(e.target.value);
-                                            }}
+                                            onChange={handleNameChange}
                                         />
+                                        {nameError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{nameError}</p>
+                                            )}
                                     </div>
 
                                     <div className="col-md-6 my-3">
                                         <label>Phone Number</label>
                                         <input
-                                            id="m_no"
+                                        
                                             className="form-control"
                                             name="m_no"
                                             type="tel"
+                                            pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
                                             maxLength={10}
                                             minLength={10}
                                             value={number}
-                                            onChange={(e) => {
-                                                setNumber(e.target.value)
-                                            }}
+                                            onChange={handleNumberChange}
                                         />
+                                        {numberError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{numberError}</p>
+                                            )}
                                     </div>
 
                                     <div className="col-md-6 my-3">
@@ -105,10 +158,12 @@ export default function AddUser() {
                                             name="m_no"
                                             type="email"
                                             value={email}
-                                            onChange={(e) => {
-                                                setEmail(e.target.value)
-                                            }}
+                                            onChange={handleEmailChange}
                                         />
+                                        {emailError
+                                            && (
+                                                <p className="text-danger mx-2 my-2">{emailError}</p>
+                                            )}
                                     </div>
 
                                 </div>

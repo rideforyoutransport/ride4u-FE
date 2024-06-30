@@ -5,6 +5,7 @@ import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import Trips from '../sidenav/trips/Trips';
 import AddTrip from '../sidenav/trips/AddTrip';
+import ViewTrip from '../sidenav/trips/ViewTrip';
 import Bookings from '../sidenav/bookings/Bookings';
 import Drivers from '../sidenav/drivers/Drivers';
 import Vehicles from '../sidenav/vehicles/Vehicles';
@@ -38,8 +39,8 @@ export default function Home() {
           <Route path="users" element={<Users />} />
           <Route path="requestedTrips" element={<RequestedTrips />} />
           <Route path="changePassword" element={<ChangePassword />} />
-
           <Route path="addTrip" element={<AddTrip />} />
+          <Route path="viewTrip" element={<ViewTrip />} />
           <Route path="addVehicle" element={<AddVehicle />} />
           <Route path="addVendor" element={<AddVendor />} />
           <Route path="addDriver" element={<AddDriver />} />

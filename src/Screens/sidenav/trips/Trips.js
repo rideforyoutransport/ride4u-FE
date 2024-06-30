@@ -53,6 +53,9 @@ export default function Trips() {
   const handleButtonEditClick = (r) => {
     navigate('/addTrip', { state: r });
   }
+  const handleButtonViewClick = (r) => {
+    navigate('/viewTrip', { state: r });
+  }
 
   const handleChange = useCallback((state) => {
     setSelectedRows(state.selectedRows);
@@ -136,10 +139,16 @@ export default function Trips() {
       index: 8
     },
     {
+      name: "Return Trip",
+      selector: (row) => row.returnTrip != null ? "true" : "false",
+      sortable: true,
+      index: 9
+    },
+    {
       name: "Luggage Options",
       selector: (row) => row.luggage.toString(),
       sortable: true,
-      index: 9
+      index: 10
     },
     // {
     //   name: "PromoCodes",
@@ -156,7 +165,7 @@ export default function Trips() {
       name: "Vehicle",
       selector: (row) => row.vehicle != null ? row.vehicle.name : "Some Vehicle",
       sortable: true,
-      index: 10
+      index: 11
     },
     {
       name: "Stops",
@@ -168,7 +177,7 @@ export default function Trips() {
         return stops;
       },
       sortable: true,
-      index: 11,
+      index: 12,
     },
 
 
@@ -176,45 +185,29 @@ export default function Trips() {
       name: "Total Seats ",
       selector: (row) => row.totalSeats,
       sortable: true,
-      index: 12
+      index: 13
     },
     {
       name: "Total Trip Amount",
       selector: (row) => row.totalTripAmount,
       sortable: true,
-      index: 13
+      index: 14
     },
-    // {
-    //   name: "Panel Status",
-    //   selector: (row) => {
-    //     if (row.pDemoValue == 0) {
-    //       return "Demo"
-    //     } else if (row.pDemoValue == 1) {
-    //       return "Testing/Staging"
-    //     } else if (row.pDemoValue == 2) {
-    //       return "Pre-Production"
-    //     } else if (row.pDemoValue == 3) {
-    //       return "Production (Live)"
-    //     } else return "Null"
-    //   },
-    //   sortable: true,
-    //   index: 12
-    // },
-    // {
-    //   name: "Change Status",
-    //   cell: (r) => <button className="btn btn-outline-warning btn-sm" onClick={() => handleButtonClick(r)}>{r.deleted ? 'In-Active' : 'Active'}</button>,
-    //   ignoreRowClick: true,
-    //   allowOverflow: true,
-    //   button: true,
-    //   index: 13
-    // },
+    {
+      name: "Action",
+      cell: (r) => <button className="btn btn-outline-primary btn-sm" onClick={() => handleButtonViewClick(r)}>View</button>,
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      index: 15
+    },
     {
       name: "Action",
       cell: (r) => <button className="btn btn-outline-success btn-sm" onClick={() => handleButtonEditClick(r)}>Edit</button>,
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      index: 14
+      index: 16
     }
   ];
   return (
