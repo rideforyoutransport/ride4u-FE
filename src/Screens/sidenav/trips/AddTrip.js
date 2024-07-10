@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import axios, { all } from "axios";
-import validator from "validator";
+import validator, { toInt } from "validator";
 import { useNavigate } from "react-router-dom";
 import Autocomplete from "react-google-autocomplete";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
@@ -85,12 +85,9 @@ export default function AddTrip() {
     const [luggageError, setLuggageError] = useState(null);
     const [bmaError, setBmaError] = useState(null);
     const [returnTripDateError, setReturnTripDateError] = useState(null);
-    const [stopsValueTemp, setStopsValueTemp] = useState('');
+    const [stopsValueTemp, setStopsValueTemp] = useState(null);
     const [fareError, setFareError] = useState(null);
     const [fareReturnError, setFareReturnError] = useState(null);
-
-
-
 
 
 
@@ -394,7 +391,7 @@ export default function AddTrip() {
                          element = {
                             "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                             "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": 1,
+                            "fare": "1",
                             hidden: false,
                             master:true
                         }
@@ -402,7 +399,7 @@ export default function AddTrip() {
                          element = {
                             "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                             "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": 0,
+                            "fare": "0",
                             hidden: false,
                             master:false
                         }
@@ -444,7 +441,7 @@ export default function AddTrip() {
                         element = {
                             "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                             "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": 1,
+                            "fare": "1",
                             "hidden":false,
                             "master":true
                         }
@@ -452,7 +449,7 @@ export default function AddTrip() {
                         element = {
                             "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                             "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": 0,
+                            "fare": "0",
                             "hidden":false,
                             "master":false
                         }
@@ -480,7 +477,7 @@ export default function AddTrip() {
         console.log(event.target.value, idx)
         let allPossibleFaresTemp = [...allPossibleFares];
         console.log({ allPossibleFaresTemp })
-        allPossibleFaresTemp[idx].fare = event.target.value;
+        allPossibleFaresTemp[idx].fare = event.target.value.toString();
         setAllPossibleFares(allPossibleFaresTemp);
         if (checkZeroFare()) {
             setFareError(null);
@@ -519,7 +516,7 @@ export default function AddTrip() {
             let masterFareReturn = false;
             for (let index = 0; index < allPossibleFares.length; index++) {
                 const element = allPossibleFares[index];
-                if(element.master && element.fare>0)
+                if(element.master &&  element.fare>0)
                     masterFareReturn = true;
             }
             return masterFare && masterFareReturn;
@@ -532,7 +529,7 @@ export default function AddTrip() {
         console.log(event.target.value, idx)
         let allPossibleFaresTemp = [...allPossibleFaresReturn];
         console.log({ allPossibleFaresTemp })
-        allPossibleFaresTemp[idx].fare = event.target.value;
+        allPossibleFaresTemp[idx].fare = event.target.value.toString();
         setAllPossibleFaresReturn(allPossibleFaresTemp);
         if (checkZeroFare()) {
             setFareReturnError(null)
@@ -693,7 +690,7 @@ export default function AddTrip() {
                         <div className="card-body">
                             <h4 className="card-title">{state ? "Edit Trip" : "Add New Trip"}</h4>
                             <div className="cmxform">
-                                <div className="form-group row">
+                               {/*} <div className="form-group row">
 
                                     <div className="col-md-6 my-3">
                                         <label>Vendor</label>
@@ -710,7 +707,7 @@ export default function AddTrip() {
                                         )}
                                     </div>
 
-                                </div>
+                                </div>*/}
                                 {state ? null : <div className="form-group row">
 
                                     <div className="col-md-6 my-3">

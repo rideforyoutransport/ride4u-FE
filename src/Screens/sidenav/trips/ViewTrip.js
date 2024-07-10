@@ -287,7 +287,7 @@ export default function ViewTrip() {
                         <div className="card-body">
                             <h4 className="card-title">{state ? "View Trip" : "Add New Trip"}</h4>
                             <div className="cmxform">
-                                <div className="form-group row">
+                               {/* <div className="form-group row">
 
                                     <div className="col-md-6 my-3">
                                         <label>Vendor</label>
@@ -302,7 +302,7 @@ export default function ViewTrip() {
                                       
                                     </div>
 
-                                </div>
+                                </div>*/}
                                
                                 <div className="form-group row">
 
