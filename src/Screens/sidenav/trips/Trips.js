@@ -66,7 +66,7 @@ export default function Trips() {
     selectedRows.map(row => {
       ids.push(row.id);
       if (row.returnTrip) {
-        ids.push(row.returnTrip);
+        ids.push(row.returnTrip.id);
       }
     });
     let data = { ids };
