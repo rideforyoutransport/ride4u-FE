@@ -564,6 +564,8 @@ export default function AddTrip() {
 
             let stopsObj = { lat, lng, place_id, place_name };
             setStops((prevStop) => [...prevStop, stopsObj]);
+             document.getElementById('autoCompleteInput').click();
+
         }
 
     }, [stops]);
@@ -804,9 +806,11 @@ export default function AddTrip() {
                                                 apiKey='AIzaSyCe2Qm2I2LbbZKGDagFKq1yYyF5_JyUcUI'
                                                 className="form-control"
                                                 type="text"
+                                                id="autoCompleteInput"
                                                 options={restrictions}
                                                 onPlaceSelected={(place) => {
                                                     handleLocationSelected(place);
+
                                                 }}
                                                 onChange={(e) => handleStopsValueChange(e, "add")}
                                                 value={stopsValueTemp}
