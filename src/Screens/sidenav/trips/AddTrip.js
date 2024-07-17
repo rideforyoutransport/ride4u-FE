@@ -88,6 +88,7 @@ export default function AddTrip() {
     const [stopsValueTemp, setStopsValueTemp] = useState(null);
     const [fareError, setFareError] = useState(null);
     const [fareReturnError, setFareReturnError] = useState(null);
+    const [tripSelectUpdation, setTripSelectUpdation] = useState(false);
 
 
 
@@ -194,80 +195,7 @@ export default function AddTrip() {
 
     }, [])
 
-    let setValues = (trip, vehicles, drivers, vendors) => {
-        let vehicleTemp = {}
-        vehicles.forEach(element => {
-            if (element.id == trip.vehicle.id) {
-                vehicleTemp = element;
-            }
-        });
-        setVehicle(vehicleTemp);
-        let driverTemp = {}
-        drivers.forEach(element => {
-            if (element.id == trip.driver.id) {
-                driverTemp = element;
-            }
-        });
-        setDriver(driverTemp);
-        let vendorTemp = {};
-        vendors.forEach(element => {
-            if (element.id == trip.vendor[0].id) {
-                vendorTemp = element;
-            }
-        });
-        setVendor(vendorTemp);
-        setLuggage(trip.luggage);
-        setTripDiscription(trip.tripDescription);
-        setRefreshments(trip.refreshments);
-        setReturnTrip(trip.returnTrip ? true : false);
-        let from = trip.from;
-        from.lat = trip.from.geoLocation.lat;
-        from.lng = trip.from.geoLocation.lng;
-        from.place_name = from.name;
-        setFrom(from);
-        let to = trip.to;
-        to.lat = trip.to.geoLocation.lat;
-        to.lng = trip.to.geoLocation.lng;
-        to.place_name = to.name;
-        setTo(to);
-        let stops = [...trip.stops];
-        stops.map(stop => {
-            stop.lat = stop.geoLocation.lat;
-            stop.lng = stop.geoLocation.lng;
-            stop.place_name = stop.name;
-        })
-        setStops(stops);
-        setAllPossibleFares(trip.fares.fares);
-        if (state) {
-            setTripDate(trip.tripDate);
-        }
-        if (trip.returnTrip) {
-            let stops = [...trip.returnTrip.stops];
-            stops.map(stop => {
-                stop.lat = stop.geoLocation.lat;
-                stop.lng = stop.geoLocation.lng;
-                stop.place_name = stop.name;
-            })
-            setStopsReturn(stops);
-            setAllPossibleFaresReturn(trip.returnTrip.fares.fares);
-
-            let from = trip.returnTrip.from;
-            from.lat = trip.returnTrip.from.geoLocation.lat;
-            from.lng = trip.returnTrip.from.geoLocation.lng;
-            from.place_name = from.name;
-            setFromReturn(from);
-
-            let to = trip.returnTrip.to;
-            to.lat = trip.returnTrip.to.geoLocation.lat;
-            to.lng = trip.returnTrip.to.geoLocation.lng;
-            to.place_name = to.name;
-            setToReturn(to);
-
-            if (state) {
-                setTripDateReturn(trip.returnTrip.tripDate);
-            }
-        }
-    }
+   
 
     let addUpdateTrip = (e) => {
         e.preventDefault();
@@ -378,6 +306,7 @@ export default function AddTrip() {
 
 
     useEffect(() => {
+        if(!tripSelectUpdation){
         if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
             let tempFareObj = []
             let stopsCurr = [];
@@ -414,9 +343,95 @@ export default function AddTrip() {
                 setAllPossibleFares(state.fares.fares);
             }
         }
-        console.log(allPossibleFares)
-    }, [stops, from, to])
+        console.log("allPossibleFares")
+    }
+    }, [stops, from, to,tripSelectUpdation])
 
+
+    let setValues = (trip, vehicles, drivers, vendors) => {
+        setTripSelectUpdation(!tripSelectUpdation);
+        let vehicleTemp = {}
+        vehicles.forEach(element => {
+            if (element.id == trip.vehicle.id) {
+                vehicleTemp = element;
+            }
+        });
+        setVehicle(vehicleTemp);
+        let driverTemp = {}
+        drivers.forEach(element => {
+            if (element.id == trip.driver.id) {
+                driverTemp = element;
+            }
+        });
+        setDriver(driverTemp);
+        let vendorTemp = {};
+        vendors.forEach(element => {
+            if (element.id == trip.vendor[0].id) {
+                vendorTemp = element;
+            }
+        });
+        setVendor(vendorTemp);
+        setLuggage(trip.luggage);
+        setTripDiscription(trip.tripDescription);
+        setRefreshments(trip.refreshments);
+        setReturnTrip(trip.returnTrip ? true : false);
+        let from = trip.from;
+        from.lat = trip.from.geoLocation.lat;
+        from.lng = trip.from.geoLocation.lng;
+        from.place_name = from.name;
+        setFrom(from);
+        let to = trip.to;
+        to.lat = trip.to.geoLocation.lat;
+        to.lng = trip.to.geoLocation.lng;
+        to.place_name = to.name;
+        setTo(to);
+        let stops = [...trip.stops];
+        stops.map(stop => {
+            stop.lat = stop.geoLocation.lat;
+            stop.lng = stop.geoLocation.lng;
+            stop.place_name = stop.name;
+        })
+        setStops(stops);
+        console.log('====================================');
+        console.log("trip",trip.fares.fares,stops);
+        console.log('====================================');
+     
+        setAllPossibleFares([...trip.fares.fares]);
+
+        console.log('====================================');
+        console.log("trip",allPossibleFares,stops);
+        console.log('====================================');
+        if (state) {
+            setTripDate(trip.tripDate);
+        }
+        if (trip.returnTrip) {
+            let stops = [...trip.returnTrip.stops];
+            stops.map(stop => {
+                stop.lat = stop.geoLocation.lat;
+                stop.lng = stop.geoLocation.lng;
+                stop.place_name = stop.name;
+            })
+            setStopsReturn(stops);
+            setAllPossibleFaresReturn([],trip.returnTrip.fares.fares);
+
+            let from = trip.returnTrip.from;
+            from.lat = trip.returnTrip.from.geoLocation.lat;
+            from.lng = trip.returnTrip.from.geoLocation.lng;
+            from.place_name = from.name;
+            setFromReturn(from);
+
+            let to = trip.returnTrip.to;
+            to.lat = trip.returnTrip.to.geoLocation.lat;
+            to.lng = trip.returnTrip.to.geoLocation.lng;
+            to.place_name = to.name;
+            setToReturn(to);
+
+            if (state) {
+                setTripDateReturn(trip.returnTrip.tripDate);
+            }
+        }
+        setTripSelectUpdation(!tripSelectUpdation);
+    }
 
     // set return stops 
     useEffect(() => {
