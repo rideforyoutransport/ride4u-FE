@@ -144,6 +144,7 @@ export default function AddVehicle() {
                             <h4 className="card-title">{state ? 'Edit Vehicle' : 'Add Vehicle'}</h4>
                             <div className="cmxform">
                                 <div className="form-group row">
+                            {/*
                                 <div className="col-md-6 my-3">
                                 <label>Vendor</label>
                                 <select
@@ -158,6 +159,7 @@ export default function AddVehicle() {
                                     <p className="text-danger mx-2 my-2">{vendorError}</p>
                                 )}
                             </div>
+                             */}
                                 </div>
                                 <div className="form-group row">
                                     <div className="col-md-6 my-3">

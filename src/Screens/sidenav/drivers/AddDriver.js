@@ -158,7 +158,7 @@ export default function AddDriver() {
                                 <div className="form-group row">
 
 
-                                    <div className="col-md-6 my-3">
+                                 {/*   <div className="col-md-6 my-3">
                                         <label>Vendor</label>
                                         <select
                                             className="js-example-basic-single w-100"
@@ -171,7 +171,7 @@ export default function AddDriver() {
                                         {vendorError && (
                                             <p className="text-danger mx-2 my-2">{vendorError}</p>
                                         )}
-                                    </div>
+                                    </div>*/}
                                 </div>
                                 <div className="form-group row">
                                     <div className="col-md-6 my-3">
