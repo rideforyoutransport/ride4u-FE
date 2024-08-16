@@ -141,13 +141,13 @@ export default function ViewTrip() {
             }
         });
         setDriver(driverTemp);
-        let vendorTemp = {};
-        vendors.forEach(element => {
-            if (element.id == trip.vendor[0].id) {
-                vendorTemp = element;
-            }
-        });
-        setVendor(vendorTemp);
+        // let vendorTemp = {};
+        // vendors.forEach(element => {
+        //     if (element.id == trip.vendor[0].id) {
+        //         vendorTemp = element;
+        //     }
+        // });
+        // setVendor(vendorTemp);
         setLuggage(trip.luggage);
         setTripDiscription(trip.tripDescription);
         setRefreshments(trip.refreshments);
