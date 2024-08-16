@@ -195,7 +195,7 @@ export default function AddTrip() {
 
     }, [])
 
-   
+
 
     let addUpdateTrip = (e) => {
         e.preventDefault();
@@ -306,46 +306,46 @@ export default function AddTrip() {
 
 
     useEffect(() => {
-        if(!tripSelectUpdation){
-        if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
-            let tempFareObj = []
-            let stopsCurr = [];
-            stopsCurr.push(from);
-            stopsCurr.push(...stops);
-            stopsCurr.push(to);
-            for (let index = 0; index < stopsCurr.length; index++) {
-                for (let j = index + 1; j < stopsCurr.length; j++) {
-                    let element=null;
-                    if(stopsCurr[index].place_id==from.place_id  && stopsCurr[j].place_id == to.place_id){
-                         element = {
-                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": "1",
-                            hidden: false,
-                            master:true
+        if (!tripSelectUpdation) {
+            if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
+                let tempFareObj = []
+                let stopsCurr = [];
+                stopsCurr.push(from);
+                stopsCurr.push(...stops);
+                stopsCurr.push(to);
+                for (let index = 0; index < stopsCurr.length; index++) {
+                    for (let j = index + 1; j < stopsCurr.length; j++) {
+                        let element = null;
+                        if (stopsCurr[index].place_id == from.place_id && stopsCurr[j].place_id == to.place_id) {
+                            element = {
+                                "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                                "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                                "fare": "1",
+                                hidden: false,
+                                master: true
+                            }
+                        } else {
+                            element = {
+                                "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                                "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                                "fare": "0",
+                                hidden: false,
+                                master: false
+                            }
                         }
-                    }else{
-                         element = {
-                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": "0",
-                            hidden: false,
-                            master:false
-                        }
+
+                        tempFareObj.push(element);
                     }
-                   
-                    tempFareObj.push(element);
+                }
+                setAllPossibleFares(tempFareObj);
+            } else {
+                if (state) {
+                    setAllPossibleFares(state.fares.fares);
                 }
             }
-            setAllPossibleFares(tempFareObj);
-        } else {
-            if (state) {
-                setAllPossibleFares(state.fares.fares);
-            }
+            console.log("allPossibleFares")
         }
-        console.log("allPossibleFares")
-    }
-    }, [stops, from, to,tripSelectUpdation])
+    }, [stops, from, to, tripSelectUpdation])
 
 
     let setValues = (trip, vehicles, drivers, vendors) => {
@@ -392,14 +392,14 @@ export default function AddTrip() {
             stop.place_name = stop.name;
         })
         setStops(stops);
-        console.log('====================================');
-        console.log("trip",trip.fares.fares,stops);
-        console.log('====================================');
-     
+        // console.log('====================================');
+        // console.log("trip",trip.fares.fares,stops);
+        // console.log('====================================');
+
         setAllPossibleFares([...trip.fares.fares]);
 
         console.log('====================================');
-        console.log("trip",allPossibleFares,stops);
+        console.log("allPossibleFares", allPossibleFares);
         console.log('====================================');
         if (state) {
             setTripDate(trip.tripDate);
@@ -412,7 +412,7 @@ export default function AddTrip() {
                 stop.place_name = stop.name;
             })
             setStopsReturn(stops);
-            setAllPossibleFaresReturn([],trip.returnTrip.fares.fares);
+
 
             let from = trip.returnTrip.from;
             from.lat = trip.returnTrip.from.geoLocation.lat;
@@ -425,6 +425,7 @@ export default function AddTrip() {
             to.lng = trip.returnTrip.to.geoLocation.lng;
             to.place_name = to.name;
             setToReturn(to);
+            setAllPossibleFaresReturn([...trip.returnTrip.fares.fares]);
 
             if (state) {
                 setTripDateReturn(trip.returnTrip.tripDate);
@@ -443,45 +444,47 @@ export default function AddTrip() {
     }, [returnTrip, from, to, stops])
 
     useEffect(() => {
-        if (!state || (state.returnTrip && (JSON.stringify(fromReturn) !== JSON.stringify(state.returnTrip.from) || JSON.stringify(toReturn) !== JSON.stringify(state.returnTrip.to) || JSON.stringify(stopsReturn) !== JSON.stringify(state.returnTrip.stops)))) {
-            let tempFareObj = []
-            let stopsCurr = [];
-            stopsCurr.push(fromReturn);
-            stopsCurr.push(...stopsReturn);
-            stopsCurr.push(toReturn);
-            for (let index = 0; index < stopsCurr.length; index++) {
-                for (let j = index + 1; j < stopsCurr.length; j++) {
-                    let element =null;
-                    if(stopsCurr[index].place_id==fromReturn.place_id  && stopsCurr[j].place_id == toReturn.place_id){
-                        element = {
-                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": "1",
-                            "hidden":false,
-                            "master":true
+        if (!tripSelectUpdation) {
+            if (!state || (state.returnTrip && (JSON.stringify(fromReturn) !== JSON.stringify(state.returnTrip.from) || JSON.stringify(toReturn) !== JSON.stringify(state.returnTrip.to) || JSON.stringify(stopsReturn) !== JSON.stringify(state.returnTrip.stops)))) {
+                let tempFareObj = []
+                let stopsCurr = [];
+                stopsCurr.push(fromReturn);
+                stopsCurr.push(...stopsReturn);
+                stopsCurr.push(toReturn);
+                for (let index = 0; index < stopsCurr.length; index++) {
+                    for (let j = index + 1; j < stopsCurr.length; j++) {
+                        let element = null;
+                        if (stopsCurr[index].place_id == fromReturn.place_id && stopsCurr[j].place_id == toReturn.place_id) {
+                            element = {
+                                "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                                "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                                "fare": "1",
+                                "hidden": false,
+                                "master": true
+                            }
+                        } else {
+                            element = {
+                                "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
+                                "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
+                                "fare": "0",
+                                "hidden": false,
+                                "master": false
+                            }
                         }
-                    }else{
-                        element = {
-                            "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
-                            "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
-                            "fare": "0",
-                            "hidden":false,
-                            "master":false
-                        }
+
+                        tempFareObj.push(element);
                     }
-                    
-                    tempFareObj.push(element);
+                }
+                console.log("========tempFareObj========", tempFareObj);
+                setAllPossibleFaresReturn(tempFareObj);
+                console.log(allPossibleFaresReturn)
+            } else {
+                if (state && state.returnTrip) {
+                    setAllPossibleFaresReturn(state.returnTrip.fares.fares);
                 }
             }
-            console.log("========tempFareObj========", tempFareObj);
-            setAllPossibleFaresReturn(tempFareObj);
-            console.log(allPossibleFaresReturn)
-        } else {
-            if (state && state.returnTrip) {
-                setAllPossibleFaresReturn(state.returnTrip.fares.fares);
-            }
         }
-    }, [fromReturn, toReturn, stopsReturn])
+    }, [fromReturn, toReturn, stopsReturn, tripSelectUpdation])
 
     const restrictions = {
         types: ['geocode'],
@@ -522,16 +525,16 @@ export default function AddTrip() {
         let masterFare = false;
         for (let index = 0; index < allPossibleFares.length; index++) {
             const element = allPossibleFares[index];
-            if(element.master && element.fare>0)
+            if (element.master && element.fare > 0)
                 masterFare = true;
         }
 
-       
+
         if (returnTrip) {
             let masterFareReturn = false;
             for (let index = 0; index < allPossibleFares.length; index++) {
                 const element = allPossibleFares[index];
-                if(element.master &&  element.fare>0)
+                if (element.master && element.fare > 0)
                     masterFareReturn = true;
             }
             return masterFare && masterFareReturn;
@@ -579,7 +582,7 @@ export default function AddTrip() {
 
             let stopsObj = { lat, lng, place_id, place_name };
             setStops((prevStop) => [...prevStop, stopsObj]);
-             document.getElementById('autoCompleteInput').click();
+            document.getElementById('autoCompleteInput').click();
 
         }
 
@@ -707,7 +710,7 @@ export default function AddTrip() {
                         <div className="card-body">
                             <h4 className="card-title">{state ? "Edit Trip" : "Add New Trip"}</h4>
                             <div className="cmxform">
-                               {/*} <div className="form-group row">
+                                {/*} <div className="form-group row">
 
                                     <div className="col-md-6 my-3">
                                         <label>Vendor</label>
@@ -950,13 +953,13 @@ export default function AddTrip() {
                                                 <tbody>
                                                     <tr hidden={key.hidden}>
                                                         <th scope="row" key={idx}>{idx + 1}</th>
-                                                        <td className={key.master?"h1":""}>{key.from.name}</td>
-                                                        <td className={key.master?"h1":""}>{key.to.name}</td>
+                                                        <td className={key.master ? "h1" : ""}>{key.from.name}</td>
+                                                        <td className={key.master ? "h1" : ""}>{key.to.name}</td>
                                                         <td><input
                                                             className="form-control"
                                                             type="number"
                                                             value={key.fare}
-                                                            min={key.master?1:0}
+                                                            min={key.master ? 1 : 0}
                                                             onChange={(e) => setFare(e, idx)}
                                                         /></td>
                                                         <td>
@@ -1120,13 +1123,13 @@ export default function AddTrip() {
                                                     <tr hidden={key.hidden}>
                                                         <th scope="row" key={idx}>{idx + 1}</th>
 
-                                                        <td className={key.master?"h1":""}>{key.from.name}</td>
-                                                        <td className={key.master?"h1":""}>{key.to.name}</td>
+                                                        <td className={key.master ? "h1" : ""}>{key.from.name}</td>
+                                                        <td className={key.master ? "h1" : ""}>{key.to.name}</td>
                                                         <td><input
 
                                                             className="form-control"
                                                             type="number"
-                                                            min={key.master?1:0}
+                                                            min={key.master ? 1 : 0}
                                                             value={key.fare}
                                                             onChange={(e) => setFareReturn(e, idx)}
                                                         /></td>
