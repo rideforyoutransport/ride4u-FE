@@ -49,7 +49,7 @@ export default function AddTrip() {
     const [vehicle, setVehicle] = useState({});
     const [luggage, setLuggage] = useState([]);
     const [refreshments, setRefreshments] = useState(false);
-    const [bookingMinimumAmount, setBookingMinimumAmount] = useState(25);
+    const [bookingMinimumAmount, setBookingMinimumAmount] = useState(1);
     const [totalTripAmount, settotalTripAmount] = useState(0);
     const [tripDiscription, setTripDiscription] = useState('');
     const [tripDate, setTripDate] = useState('');
@@ -365,12 +365,12 @@ export default function AddTrip() {
         });
         setDriver(driverTemp);
         let vendorTemp = {};
-        vendors.forEach(element => {
-            if (element.id == trip.vendor[0].id) {
-                vendorTemp = element;
-            }
-        });
-        setVendor(vendorTemp);
+        // vendors.forEach(element => {
+        //     if (element.id == trip.vendor[0].id) {
+        //         vendorTemp = element;
+        //     }
+        // });
+        // setVendor(vendorTemp);
         setLuggage(trip.luggage);
         setTripDiscription(trip.tripDescription);
         setRefreshments(trip.refreshments);
@@ -922,8 +922,8 @@ export default function AddTrip() {
                                             value={bookingMinimumAmount}
                                             onChange={(e) => {
                                                 setBookingMinimumAmount(e.target.value)
-                                                if (e.target.value < 25) {
-                                                    setBmaError("Minimum booking amount is 25")
+                                                if (e.target.value < 1) {
+                                                    setBmaError("Minimum booking amount should be greater than 1")
                                                 } else
                                                     setBmaError(null)
                                             }}
