@@ -201,7 +201,7 @@ export default function ViewTrip() {
         }
     }
 
- 
+
     useEffect(() => {
         if (!state || JSON.stringify(to) !== JSON.stringify(state.to) || JSON.stringify(from) !== JSON.stringify(state.from) || JSON.stringify(stops) !== JSON.stringify(state.stops)) {
             let tempFareObj = []
@@ -215,7 +215,7 @@ export default function ViewTrip() {
                         "from": { "name": stopsCurr[index].place_name, "place_id": stopsCurr[index].place_id },
                         "to": { "name": stopsCurr[j].place_name, "place_id": stopsCurr[j].place_id },
                         "fare": 0,
-                        hidden:false
+                        hidden: false
                     }
                     tempFareObj.push(element);
                 }
@@ -223,7 +223,7 @@ export default function ViewTrip() {
             setAllPossibleFares(tempFareObj);
         } else {
             if (state) {
-                console.log("this is state ",state)
+                console.log("this is state ", state)
                 setAllPossibleFares(state.fares.fares);
             }
         }
@@ -287,7 +287,7 @@ export default function ViewTrip() {
                         <div className="card-body">
                             <h4 className="card-title">{state ? "View Trip" : "Add New Trip"}</h4>
                             <div className="cmxform">
-                               {/* <div className="form-group row">
+                                {/* <div className="form-group row">
 
                                     <div className="col-md-6 my-3">
                                         <label>Vendor</label>
@@ -303,22 +303,22 @@ export default function ViewTrip() {
                                     </div>
 
                                 </div>*/}
-                               
+
                                 <div className="form-group row">
 
                                     <div className="col-md-6 my-2">
                                         <label>Origin </label>
                                         <div>
                                         </div>
-                                        <input    className="form-control" disabled={true} value={from.name}/>
+                                        <input className="form-control" disabled={true} value={from.name} />
                                     </div>
 
                                     <div className="col-md-6 my-2">
 
                                         <label>Destination </label>
-                                        <input    className="form-control" disabled={true} value={to.name}/>
-                                       
-                                       
+                                        <input className="form-control" disabled={true} value={to.name} />
+
+
                                     </div>
 
 
@@ -363,14 +363,14 @@ export default function ViewTrip() {
                                             className="js-example-basic-multiple w-100"
                                             value={luggage}
                                             disabled={true}
-                                           
+
                                         >
                                             <option className=".text-info" value={'s'}>Small</option>
-                                            <option className=".text-info"  value={'m'}>Medium</option>
+                                            <option className=".text-info" value={'m'}>Medium</option>
                                             <option value={'l'}>Large</option>
 
                                         </select>
-                                    
+
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Vehicle</label>
@@ -380,7 +380,7 @@ export default function ViewTrip() {
                                             disabled={true}>
                                             {vehicles?.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
-                                     
+
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Driver</label>
@@ -390,7 +390,7 @@ export default function ViewTrip() {
                                             disabled={true}>
                                             {drivers.map((data, idx) => <option key={idx} value={data.id}>{data.name}</option>)}
                                         </select>
-                                    
+
                                     </div>
                                     <div className="col-md-6 my-2">
                                         <label>Refreshments </label>
@@ -424,36 +424,68 @@ export default function ViewTrip() {
                                             disabled={true}
                                             value={bookingMinimumAmount}
                                         />
-                                       
+
                                     </div>
 
                                     <div className="col-md-12 my-12">
-
                                         <label>Fares</label>
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">#</th>
-                                                    <th scope="col">From</th>
-                                                    <th scope="col">To</th>
-                                                    <th scope="col">Fare</th>
-                                                </tr>
-                                            </thead>
-                                            {allPossibleFares?.map((key, idx) => (
 
-                                                <tbody>
-                                                    <tr hidden={key.hidden}>
-                                                        <th scope="row" key={idx}>{idx + 1}</th>
-                                                        <td>{key.from.name}</td>
-                                                        <td>{key.to.name}</td>
-                                                        <td>{key.fare}</td>
-                                                    </tr>
+                                        {/* Table for Desktop */}
+                                        <div className="d-none d-md-block">
+                                            <div className="table-responsive">
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">#</th>
+                                                            <th scope="col">From</th>
+                                                            <th scope="col">To</th>
+                                                            <th scope="col">Fare</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {allPossibleFares?.map((key, idx) => (
+                                                            !key.hidden && (
+                                                                <tr key={idx}>
+                                                                    <th scope="row">{idx + 1}</th>
+                                                                    <td>{key.from.name}</td>
+                                                                    <td>{key.to.name}</td>
+                                                                    <td>{key.fare}</td>
+                                                                </tr>
+                                                            )
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
 
-                                                </tbody>
-                                            ))}
-                                        </table>
+                                        {/* Card Layout for Mobile */}
+                                        <div className="d-md-none">
+                                            <div className="row">
+                                                {allPossibleFares?.map((key, idx) => (
+                                                    !key.hidden && (
+                                                        <div className="col-12 mb-3" key={idx}>
+                                                            <div className="card">
+                                                                <div className="card-body">
+                                                                    <h5 className="card-title">{`Fare #${idx + 1}`}</h5>
+                                                                    <div className="mb-2">
+                                                                        <strong>From:</strong> {key.from.name}
+                                                                    </div>
+                                                                    <div className="mb-2">
+                                                                        <strong>To:</strong> {key.to.name}
+                                                                    </div>
+                                                                    <div className="mb-2">
+                                                                        <strong>Fare:</strong> {key.fare}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                ))}
+                                            </div>
+                                        </div>
 
                                     </div>
+
 
                                     <div className="col-md-6 my-3">
                                         <label>Trip Date</label>
@@ -464,12 +496,12 @@ export default function ViewTrip() {
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDate)).format("YYYY-MM-DDTHH:mm"))}
                                                         disabled={true}
-                                                        
+
                                                     />
                                                 </DemoItem>
                                             </DemoContainer>
                                         </LocalizationProvider>
-                                       
+
 
                                     </div>
 
@@ -487,13 +519,13 @@ export default function ViewTrip() {
 
                                     <div className="col-md-6 my-3">
                                         <label>Origin </label>
-                                        <input    className="form-control" disabled={true} value={fromReturn.place_name}/>
+                                        <input className="form-control" disabled={true} value={fromReturn.place_name} />
                                     </div>
 
                                     <div className="col-md-6 my-2">
 
                                         <label>Destination </label>
-                                        <input    className="form-control" disabled={true} value={toReturn.place_name}/>
+                                        <input className="form-control" disabled={true} value={toReturn.place_name} />
                                     </div>
 
 
@@ -533,16 +565,16 @@ export default function ViewTrip() {
                                             </thead>
                                             {allPossibleFaresReturn?.map((key, idx) => (
 
-                                    
-                                                <tbody>
-                                                <tr hidden={key.hidden}>
-                                                    <th scope="row" key={idx}>{idx + 1}</th>
-                                                    <td>{key.from.name}</td>
-                                                    <td>{key.to.name}</td>
-                                                    <td>{key.fare}</td>
-                                                </tr>
 
-                                            </tbody>
+                                                <tbody>
+                                                    <tr hidden={key.hidden}>
+                                                        <th scope="row" key={idx}>{idx + 1}</th>
+                                                        <td>{key.from.name}</td>
+                                                        <td>{key.to.name}</td>
+                                                        <td>{key.fare}</td>
+                                                    </tr>
+
+                                                </tbody>
 
                                             ))}
                                         </table>
@@ -556,26 +588,26 @@ export default function ViewTrip() {
                                                     <DateTimePicker
                                                         value={dayjs(moment(new Date(tripDateReturn)).format("YYYY-MM-DDTHH:mm"))}
                                                         disabled={true}
-                                    
+
                                                     />
                                                 </DemoItem>
                                             </DemoContainer>
                                         </LocalizationProvider>
-                                    
+
 
                                     </div>
 
                                 </div>
                             </div>}
                             <div className="row">
-                            <div className="col-md-5"></div>
-                            <div className="col-md-6">
-                            </div>
-                           
-                            </div>
-                           
+                                <div className="col-md-5"></div>
+                                <div className="col-md-6">
+                                </div>
 
-                           
+                            </div>
+
+
+
                         </div>
                     </div>
                 </div>
