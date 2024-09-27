@@ -1151,51 +1151,98 @@ export default function AddTrip() {
                                 <div className="form-group row">
 
                                     <div className="col-md-12 my-12">
-
                                         <label>Fares Return</label>
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">#</th>
-                                                    <th scope="col">From</th>
-                                                    <th scope="col">To</th>
-                                                    <th scope="col">Fare</th>
-                                                </tr>
-                                            </thead>
-                                            {allPossibleFaresReturn?.map((key, idx) => (
 
+                                        {/* Table for Desktop */}
+                                        <div className="d-none d-md-block">
+                                            <div className="table-responsive">
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">#</th>
+                                                            <th scope="col">From</th>
+                                                            <th scope="col">To</th>
+                                                            <th scope="col">Fare</th>
+                                                            <th scope="col">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {allPossibleFaresReturn?.map((key, idx) => (
+                                                            !key.hidden && (
+                                                                <tr key={idx}>
+                                                                    <th scope="row">{idx + 1}</th>
+                                                                    <td className={key.master ? "h1" : ""}>{key.from.name}</td>
+                                                                    <td className={key.master ? "h1" : ""}>{key.to.name}</td>
+                                                                    <td>
+                                                                        <input
+                                                                            className="form-control"
+                                                                            type="number"
+                                                                            min={key.master ? 1 : 0}
+                                                                            value={key.fare}
+                                                                            onChange={(e) => setFareReturn(e, idx)}
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <button
+                                                                            className="btn btn-danger w-100"
+                                                                            onClick={() => updateHiddenFares(idx, true)}
+                                                                            disabled={key.master}
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
 
-                                                <tbody>
-                                                    <tr hidden={key.hidden}>
-                                                        <th scope="row" key={idx}>{idx + 1}</th>
+                                        {/* Card Layout for Mobile */}
+                                        <div className="d-md-none">
+                                            <div className="row">
+                                                {allPossibleFaresReturn?.map((key, idx) => (
+                                                    !key.hidden && (
+                                                        <div className="col-12 mb-3" key={idx}>
+                                                            <div className="card">
+                                                                <div className="card-body">
+                                                                    <h5 className="card-title">{`Fare #${idx + 1}`}</h5>
+                                                                    <div className="mb-2">
+                                                                        <strong>From:</strong> {key.from.name}
+                                                                    </div>
+                                                                    <div className="mb-2">
+                                                                        <strong>To:</strong> {key.to.name}
+                                                                    </div>
+                                                                    <div className="mb-3">
+                                                                        <input
+                                                                            className="form-control"
+                                                                            type="number"
+                                                                            min={key.master ? 1 : 0}
+                                                                            value={key.fare}
+                                                                            onChange={(e) => setFareReturn(e, idx)}
+                                                                        />
+                                                                    </div>
+                                                                    <button
+                                                                        className="btn btn-danger w-100"
+                                                                        onClick={() => updateHiddenFares(idx, true)}
+                                                                        disabled={key.master}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                                        <td className={key.master ? "h1" : ""}>{key.from.name}</td>
-                                                        <td className={key.master ? "h1" : ""}>{key.to.name}</td>
-                                                        <td><input
-
-                                                            className="form-control"
-                                                            type="number"
-                                                            min={key.master ? 1 : 0}
-                                                            value={key.fare}
-                                                            onChange={(e) => setFareReturn(e, idx)}
-                                                        /></td>
-                                                        <td>
-                                                            <button
-                                                                className="btn btn-danger mr-2 w-100"
-                                                                onClick={() => updateHiddenFares(idx, true)}
-                                                                disabled={key.master}
-                                                            >Delete</button>
-                                                        </td>
-                                                    </tr>
-
-                                                </tbody>
-
-                                            ))}
-                                            {fareError && (
-                                                <p className="text-danger mx-2 my-2">{fareError}</p>
-                                            )}
-                                        </table>
+                                        {fareReturnError && (
+                                            <p className="text-danger mx-2 my-2">{fareReturnError}</p>
+                                        )}
                                     </div>
+
                                     <div className="col-md-6 my-3">
                                         <label>Return Trip Date</label>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
