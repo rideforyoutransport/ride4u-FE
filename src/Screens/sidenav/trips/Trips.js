@@ -84,6 +84,7 @@ export default function Trips() {
 
   const columns = [
 
+
     {
       name: "Id",
       selector: (row) => row.id,
@@ -196,7 +197,7 @@ export default function Trips() {
       index: 14
     },
     {
-      name: "Action",
+      name: "View",
       cell: (r) => <button className="btn btn-outline-primary btn-sm" onClick={() => handleButtonViewClick(r)}>View</button>,
       ignoreRowClick: true,
       allowOverflow: true,
@@ -205,7 +206,19 @@ export default function Trips() {
     },
     {
       name: "Action",
-      cell: (r) => <button className="btn btn-outline-success btn-sm" onClick={() => handleButtonEditClick(r)}>Edit</button>,
+      cell: (r) => <button className="btn btn-outline-secondary btn-sm" onClick={() => handleButtonEditClick(r)}>Edit</button>,
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      index: 16
+    },
+    {
+      name: "Share",
+      cell: (r) => <button className="btn btn-outline-danger btn-sm" onClick={() => {
+        navigator.clipboard.writeText("https://rideforyoutransport.com/trip/"+r.id)
+        alert("Link has been copied to Clipboard!")
+
+      }}>Share</button>,
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
