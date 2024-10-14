@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.rideforyoutransport.rideforyou",
+            "sha256_cert_fingerprints": [
+                "B4:A7:10:F8:FC:BD:26:0D:53:4E:4C:61:67:54:B6:F8:10:2C:77:B7:69:AD:C8:2A:18:CD:9C:9C:FB:AF:60:A9"
+            ]
+        }
+    }
+]
