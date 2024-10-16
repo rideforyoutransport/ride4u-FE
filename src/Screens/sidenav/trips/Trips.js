@@ -215,7 +215,7 @@ export default function Trips() {
     {
       name: "Share",
       cell: (r) => <button className="btn btn-outline-danger btn-sm" onClick={() => {
-        navigator.clipboard.writeText("https://dev.rideforyoutransport.com/api/others/share?url=app&id="+r.id)
+        navigator.clipboard.writeText("https://admin.rideforyoutransport.com/trip/"+r.id)
         alert("Link has been copied to Clipboard!")
 
       }}>Share</button>,
