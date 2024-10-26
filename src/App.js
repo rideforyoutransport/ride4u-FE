@@ -5,6 +5,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "./Screens/login/Login";
 import { get } from "./utils/Crypto";
 import PrivacyPolicy from "./Screens/PrivacyPolicy";
+import Redirection from "./Screens/Redirection";
+
 
 function App() {
   const [authorized, setAuthorized] = useState(() => {
@@ -17,6 +19,7 @@ function App() {
     <div>
       <Routes>
         <Route path="/privacyPolicy" element={<PrivacyPolicy/>} />
+        <Route path="/trip/*" element={<Redirection/>} />
         <Route
           path="/*"
           element={
