@@ -94,6 +94,28 @@ export default function AddTrip() {
 
 
     const [masterError, setMasterError] = useState(null);
+    const checkZeroFare = () => {
+
+        let masterFare = false;
+        for (let index = 0; index < allPossibleFares.length; index++) {
+            const element = allPossibleFares[index];
+            if (element.master && element.fare > 0)
+                masterFare = true;
+        }
+
+
+        if (returnTrip) {
+            let masterFareReturn = false;
+            for (let index = 0; index < allPossibleFares.length; index++) {
+                const element = allPossibleFares[index];
+                if (element.master && element.fare > 0)
+                    masterFareReturn = true;
+            }
+            return masterFare && masterFareReturn;
+        }
+
+        return masterFare;
+    }
 
     useEffect(() => {
         if (
@@ -122,7 +144,7 @@ export default function AddTrip() {
         luggageError,
         bmaError,
         fareError,
-        fareReturnError]);
+        fareReturnError,checkZeroFare()]);
 
     useEffect(() => {
         let data = {
@@ -215,6 +237,7 @@ export default function AddTrip() {
                 "tripDescription": tripDiscription,
                 "totalTripAmount": totalTripAmount,
                 "refreshments": refreshments,
+                "bookingAmount": bookingMinimumAmount,
 
                 "returnTrip": returnTrip ?
                     {
@@ -374,6 +397,7 @@ export default function AddTrip() {
         setLuggage(trip.luggage);
         setTripDiscription(trip.tripDescription);
         setRefreshments(trip.refreshments);
+        setBookingMinimumAmount(trip.bookingMinimumAmount)
         setReturnTrip(trip.returnTrip ? true : false);
         let from = trip.from;
         from.lat = trip.from.geoLocation.lat;
@@ -520,28 +544,6 @@ export default function AddTrip() {
         }
     }
 
-    const checkZeroFare = () => {
-
-        let masterFare = false;
-        for (let index = 0; index < allPossibleFares.length; index++) {
-            const element = allPossibleFares[index];
-            if (element.master && element.fare > 0)
-                masterFare = true;
-        }
-
-
-        if (returnTrip) {
-            let masterFareReturn = false;
-            for (let index = 0; index < allPossibleFares.length; index++) {
-                const element = allPossibleFares[index];
-                if (element.master && element.fare > 0)
-                    masterFareReturn = true;
-            }
-            return masterFare && masterFareReturn;
-        }
-
-        return masterFare;
-    }
 
     const setFareReturn = (event, idx) => {
         console.log(event.target.value, idx)

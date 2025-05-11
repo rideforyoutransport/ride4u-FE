@@ -150,6 +150,7 @@ export default function ViewTrip() {
         // setVendor(vendorTemp);
         setLuggage(trip.luggage);
         setTripDiscription(trip.tripDescription);
+        setBookingMinimumAmount(trip.bookingMinimumAmount);
         setRefreshments(trip.refreshments);
         setReturnTrip(trip.returnTrip ? true : false);
         let from = trip.from;
