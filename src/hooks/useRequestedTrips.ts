@@ -14,10 +14,16 @@ export const useRequestedTrips = () => {
       setError(null);
       const response = await requestedTripsService.getRequestedTrips();
       if (response.success) {
-        setRequestedTrips(response.result.items);
+        // Ensure we always set an array
+        const trips = response.result ?? [];
+        console.log(trips);
+        setRequestedTrips(Array.isArray(trips) ? trips : []);
+      } else {
+        setRequestedTrips([]);
       }
     } catch (err: any) {
       setError(err.message);
+      setRequestedTrips([]); // Set empty array on error
       toast.error('Failed to fetch requested trips');
     } finally {
       setLoading(false);

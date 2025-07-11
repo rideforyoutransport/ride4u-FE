@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui';
 import { VehicleForm } from '../../components/forms';
+import { PageLoading } from '../../components/ui';
 import { useVehicles, useVendors } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
 import type { CreateVehicleData } from '../../types';
@@ -13,39 +14,47 @@ export const AddEditVehicle: React.FC = () => {
   const isEdit = Boolean(id);
   
   const { createVehicle, updateVehicle, getVehicle, loading } = useVehicles();
-  const { vendors } = useVendors();
+  const { vendors, loading: vendorsLoading } = useVendors();
   
   const [initialData, setInitialData] = useState<Partial<CreateVehicleData>>();
 
   useEffect(() => {
-    if (isEdit && id) {
-      const loadVehicle = async () => {
-        const vehicle = await getVehicle(id);
-        if (vehicle) {
-          setInitialData({
-            name: vehicle.name,
-            number: vehicle.number,
-            totalSeats: vehicle.totalSeats,
-            vendor: vehicle.vendor?.[0]?.id,
-          });
-        }
-      };
-      loadVehicle();
+    if (vendors.length > 0) {
+      const vendor = vendors[0];
+      if (isEdit && id) {
+        const loadVehicle = async () => {
+          const vehicle = await getVehicle(id);
+          if (vehicle) {
+            setInitialData({
+              name: vehicle.name,
+              number: vehicle.number,
+              totalSeats: vehicle.totalSeats,
+              vendor: vendor.id,
+            });
+          }
+        };
+        loadVehicle();
+      }
     }
-  }, [isEdit, id, getVehicle]);
+  }, [isEdit, id, getVehicle, vendors]);
 
   const handleSubmit = async (data: CreateVehicleData) => {
     try {
       if (isEdit && id) {
         await updateVehicle(id, data);
       } else {
-        await createVehicle(data);
+        await createVehicle(data as CreateVehicleData);
       }
       navigate(ROUTES.VEHICLES);
     } catch (error) {
       console.error('Error saving vehicle:', error);
     }
   };
+
+  // Show loading while vendors are being fetched
+  if (vendorsLoading || vendors.length === 0) {
+    return <PageLoading />;
+  }
 
   return (
     <div className="space-y-6">
@@ -62,6 +71,7 @@ export const AddEditVehicle: React.FC = () => {
 
       <VehicleForm
         initialData={initialData}
+        vendor={vendors[0]}
         onSubmit={handleSubmit}
         loading={loading}
         isEdit={isEdit}

@@ -1,14 +1,14 @@
-export interface RequestedTrip {
+import { Location } from "./trip.types";
+import { User } from "./user.types";
+  
+  export interface RequestedTrip {
     id: string;
-    customerPhone: string;
-    fromLocation: string;
-    toLocation: string;
-    requestedDate: string;
-    estimatedCost: number;
-    actualDistance?: number;
-    estimatedDuration?: number;
-    numberOfPassengers: number;
+    requestingUser: User;
+    requestDate: string;
+    origin: Location;
+    destination: Location;
+    totalSeats: number;
+    mobile: string;
     created: string;
-    updated?: string;
-    tripId?: string; // If approved and converted to actual trip
-}
+  }
+  

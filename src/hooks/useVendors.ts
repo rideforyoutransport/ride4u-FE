@@ -14,6 +14,7 @@ export const useVendors = () => {
       setError(null);
       const response = await vendorsService.getVendors();
       if (response.success) {
+        console.log(response.result.items)
         setVendors(response.result.items);
       }
     } catch (err: any) {

@@ -40,6 +40,7 @@ export const useDrivers = () => {
   const createDriver = useCallback(async (data: CreateDriverData) => {
     try {
       setLoading(true);
+      console.log(data);
       const response = await driversService.create(data);
       if (response.success) {
         toast.success('Driver created successfully');

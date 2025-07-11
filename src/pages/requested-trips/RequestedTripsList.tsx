@@ -8,63 +8,55 @@ import type { RequestedTrip } from '../../types';
 
 export const RequestedTripsList: React.FC = () => {
   const { requestedTrips, loading } = useRequestedTrips();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: 'warning' as const,
-      approved: 'success' as const,
-      rejected: 'error' as const,
-    };
-    return <Badge variant={variants[status as keyof typeof variants] || 'default'}>{status}</Badge>;
-  };
 
   const columns = [
     {
       key: 'route',
       header: 'Route',
       render: (trip: RequestedTrip) => 
-        `${trip.fromLocation} → ${trip.toLocation}`,
+        `${trip.origin?.name || 'N/A'} → ${trip.destination?.name || 'N/A'}`,
     },
     {
-      key: 'requestedDate' as keyof RequestedTrip,
-      header: 'Trip Date',
-      render: (trip: RequestedTrip) => formatDate(trip.requestedDate),
+      key: 'totalSeats' as keyof RequestedTrip,
+      header: 'Seats Required',
+      render: (trip: RequestedTrip) => trip.totalSeats,
+    },
+    {
+      key: 'requestDate' as keyof RequestedTrip,
+      header: 'Request Date',
+      render: (trip: RequestedTrip) => formatDate(trip.requestDate),
+    },
+    {
+      key: 'requestingUser',
+      header: 'Requesting User',
+      render: (trip: RequestedTrip) => trip.requestingUser?.name || 'N/A',
+    },
+    {
+      key: 'mobile',
+      header: 'User Phone Number',
+      render: (trip: RequestedTrip) => trip.mobile || 'N/A',
+    },
+    {
+      key: 'created' as keyof RequestedTrip,
+      header: 'Created On',
+      render: (trip: RequestedTrip) => formatDate(trip.created),
     }
   ];
 
-  const filteredTrips = requestedTrips.filter((trip: any) => {
-    const matchesSearch = 
-      trip.fromLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trip.toLocation.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || trip.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const pendingCount = requestedTrips.filter(((trip: any) => trip.status === 'pending')).length;
+  // Ensure data is always an array, even if undefined or null
+  const safeRequestedTrips = requestedTrips || [];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Requested Trips</h1>
-          {pendingCount > 0 && (
-            <p className="text-sm text-gray-600 mt-1">
-              <Clock className="inline w-4 h-4 mr-1" />
-              {pendingCount} pending request{pendingCount !== 1 ? 's' : ''} awaiting approval
-            </p>
-          )}
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Requested Trips</h1>
       </div>
 
       <Card>
         <CardContent>
           <DataTable
             title='Requested Trips'
-            data={filteredTrips}
+            data={safeRequestedTrips}
             columns={columns}
             loading={loading}
             emptyMessage="No trip requests found"

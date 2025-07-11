@@ -7,6 +7,7 @@ import vehiclesSlice from './vehiclesSlice';
 import usersSlice from './usersSlice';
 import vendorsSlice from './vendorsSlice';
 import bookingsSlice from './bookingsSlice';
+import requestedTripsSlice from './requestedTripsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     users: usersSlice,
     vendors: vendorsSlice,
     bookings: bookingsSlice,
+    requestedTrips: requestedTripsSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
