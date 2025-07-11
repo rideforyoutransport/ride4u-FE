@@ -1,70 +1,209 @@
-# Getting Started with Create React App
+# RideForYou Transportation Admin Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive admin dashboard built with React, TypeScript, and Tailwind CSS for managing the RideForYou transportation service.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Modern Tech Stack**: React 18, TypeScript, Tailwind CSS
+- **State Management**: Redux Toolkit with RTK Query
+- **Authentication**: Secure login with JWT tokens
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Real-time Updates**: Live data updates and notifications
+- **Form Validation**: Comprehensive form validation with Zod
+- **API Integration**: RESTful API integration with error handling
+- **Performance**: Code splitting and lazy loading for optimal performance
 
-### `npm start`
+## 📋 Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js 16.x or higher
+- npm or yarn package manager
+- Access to the RideForYou API backend
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Installation
 
-### `npm test`
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd rideforyou-admin
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Install dependencies:
+```bash
+npm install
+```
 
-### `npm run build`
+3. Create environment file:
+```bash
+cp .env.example .env
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. Update the environment variables in `.env`:
+```env
+REACT_APP_API_URL=http://localhost:3003/api/admin
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+REACT_APP_ENVIRONMENT=development
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+5. Start the development server:
+```bash
+npm start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The application will open at `http://localhost:3000`.
 
-### `npm run eject`
+## 🏗️ Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Basic UI components
+│   ├── layout/         # Layout components
+│   ├── forms/          # Form components
+│   └── common/         # Shared components
+├── pages/              # Page components
+├── hooks/              # Custom React hooks
+├── services/           # API services
+├── store/              # Redux store and slices
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+├── context/            # React contexts
+└── styles/             # Global styles
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🔧 Available Scripts
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `npm start` - Start development server
+- `npm build` - Build for production
+- `npm test` - Run tests
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint errors
+- `npm run type-check` - Run TypeScript type checking
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🎨 Styling
 
-## Learn More
+This project uses Tailwind CSS for styling with a custom design system:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Primary Colors**: Orange theme (`#f37a0b`)
+- **Secondary Colors**: Blue theme (`#0ea5e9`)
+- **Typography**: Inter font family
+- **Components**: Custom component classes in `globals.css`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔐 Authentication
 
-### Code Splitting
+The app uses JWT-based authentication:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. Login with email and password
+2. Token is stored securely in localStorage
+3. Automatic token refresh on API calls
+4. Protected routes redirect to login if unauthenticated
 
-### Analyzing the Bundle Size
+## 📱 Responsive Design
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Mobile First**: Designed for mobile devices first
+- **Breakpoints**: sm (640px), md (768px), lg (1024px), xl (1280px)
+- **Navigation**: Collapsible sidebar on mobile
+- **Tables**: Responsive table layouts
 
-### Making a Progressive Web App
+## 🧪 Testing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+# Run all tests
+npm test
 
-### Advanced Configuration
+# Run tests in watch mode
+npm test -- --watch
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# Run tests with coverage
+npm test -- --coverage
+```
 
-### Deployment
+## 🚀 Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. Build the project:
+```bash
+npm run build
+```
 
-### `npm run build` fails to minify
+2. Deploy the `build` folder to your hosting service (Netlify, Vercel, etc.)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+3. Configure environment variables on your hosting platform
+
+## 🔧 Configuration
+
+### Environment Variables
+
+- `REACT_APP_API_URL` - Backend API base URL
+- `REACT_APP_GOOGLE_MAPS_API_KEY` - Google Maps API key for location services
+- `REACT_APP_ENVIRONMENT` - Environment (development/production)
+
+### API Integration
+
+The app integrates with the RideForYou backend API:
+
+- **Base URL**: Configured via environment variable
+- **Authentication**: Bearer token in Authorization header
+- **Error Handling**: Automatic error handling and user notifications
+
+## 📚 Key Dependencies
+
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first CSS framework
+- **Redux Toolkit** - State management
+- **React Router** - Client-side routing
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+- **Axios** - HTTP client
+- **React Hot Toast** - Notifications
+- **Lucide React** - Icons
+- **Headless UI** - Accessible UI components
+
+## 🎯 Features Overview
+
+### Trip Management
+- Create, edit, and view trips
+- Support for return trips
+- Google Maps integration for locations
+- Dynamic fare calculation
+- Stop management
+
+### Booking Management
+- View all bookings
+- Filter and search bookings
+- Export booking data
+
+### User Management
+- Manage customers, drivers, and vendors
+- User profile management
+- Role-based access control
+
+### Vehicle Management
+- Add and manage vehicles
+- Track vehicle usage and maintenance
+
+### Reporting & Analytics
+- Trip analytics
+- Revenue reporting
+- User engagement metrics
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is proprietary software owned by RideForYou Transportation Company.
+
+## 📞 Support
+
+For support and questions, please contact:
+- Email: support@rideforyoutransport.com
+- Phone: +1 343-598-0092
+
+---
+
+Built with ❤️ by the RideForYou Development Team
