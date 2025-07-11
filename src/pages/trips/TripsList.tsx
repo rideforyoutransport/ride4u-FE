@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Share } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, EmptyState, SearchInput } from '../../components/common';
 import { useTrips } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import type { Trip } from '../../types';
+import toast from 'react-hot-toast';
 
 export const TripsList: React.FC = () => {
   const navigate = useNavigate();
   const { trips, loading, deleteTrip } = useTrips();
   const [searchTerm, setSearchTerm] = useState('');
 
+  const handleShareTrip = async (trip: Trip) => {
+    const shareUrl = `https://admin.rideforyoutransport.com/trip/${trip.id}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard!");
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert("Link has not been copied to Clipboard!");
+    }
+  };
+
   const columns = [
-    {
-      key: 'id' as keyof Trip,
-      header: 'Trip ID',
-      render: (trip: Trip) => `#${trip.id}`,
-    },
-    {
-      key: 'tripDescription' as keyof Trip,
-      header: 'Description',
-      render: (trip: Trip) => trip.tripDescription || 'No description',
-    },
     {
       key: 'from' as keyof Trip,
       header: 'From',
@@ -33,6 +36,11 @@ export const TripsList: React.FC = () => {
       key: 'to' as keyof Trip,
       header: 'To',
       render: (trip: Trip) => trip.to?.name || 'N/A',
+    },
+    {
+      key: 'tripDescription' as keyof Trip,
+      header: 'Description',
+      render: (trip: Trip) => trip.tripDescription || 'No description',
     },
     {
       key: 'tripDate' as keyof Trip,
@@ -105,6 +113,12 @@ export const TripsList: React.FC = () => {
             size="sm"
             icon={Edit}
             onClick={() => navigate(`${ROUTES.EDIT_TRIP}/${trip.id}`)}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={Share}
+            onClick={() => handleShareTrip(trip)}
           />
           <Button
             variant="ghost"

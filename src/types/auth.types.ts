@@ -19,6 +19,6 @@ export interface AuthState {
 
 export interface ChangePasswordData {
   oldPassword: string;
-  password: string;
-  passwordConfirm: string;
+  newPassword: string;
+  newPasswordConfirm: string;
 }

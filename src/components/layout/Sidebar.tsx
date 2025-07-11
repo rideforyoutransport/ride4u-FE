@@ -59,8 +59,12 @@ export const Sidebar: React.FC = () => {
       >
         <div className="flex items-center justify-between p-4 border-b border-dark-700">
           <div className="flex items-center">
-            <Car className="h-8 w-8 text-primary-500 mr-2" />
-            <span className="text-lg font-bold">RIDEFORYOU</span>
+            <img
+              src="/favicon.png"
+              alt="RideForYou Logo"
+              className="h-8 w-8 mr-2 object-contain"
+            />
+            <span className="text-lg font-bold">RIDE FOR YOU</span>
           </div>
           <button
             onClick={closeSidebar}

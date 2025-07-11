@@ -37,9 +37,9 @@ export const useAuth = () => {
   const changePassword = async (oldPassword: string, newPassword: string) => {
     try {
       const response = await authService.changePassword({
-        oldPassword: oldPassword,
-        password: newPassword,
-        passwordConfirm: newPassword
+        oldPassword,
+        newPassword,
+        newPasswordConfirm: newPassword
       });
       
       if (response.success) {

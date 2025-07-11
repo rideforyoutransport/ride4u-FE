@@ -9,7 +9,7 @@ export const ChangePassword: React.FC = () => {
   const { changePassword, loading } = useAuth();
 
   const handleChangePassword = async (data: ChangePasswordData) => {
-    await changePassword(data.oldPassword, data.password);
+    await changePassword(data.oldPassword, data.newPassword);
   };
 
   return (

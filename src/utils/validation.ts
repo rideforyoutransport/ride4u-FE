@@ -23,9 +23,9 @@ export const loginSchema = z.object({
 
 export const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, 'Current password is required'),
-  password: passwordSchema,
-  passwordConfirm: z.string(),
-}).refine((data) => data.password === data.passwordConfirm, {
+  newPassword: passwordSchema,
+  newPasswordConfirm: z.string(),
+}).refine((data) => data.newPassword === data.newPasswordConfirm, {
   message: "Passwords don't match",
   path: ["passwordConfirm"],
 });

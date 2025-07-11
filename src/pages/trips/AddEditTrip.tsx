@@ -1,70 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui';
 import { TripForm } from '../../components/forms';
+import { PageLoading } from '../../components/ui';
 import { useTrips, useVehicles, useDrivers, useVendors } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
-import type { CreateTripData } from '../../types';
 
 export const AddEditTrip: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEdit = Boolean(id);
+  const location = useLocation();
+  const { state } = location;
   
-  const { createTrip, updateTrip, getTrip, loading } = useTrips();
-  const { vehicles } = useVehicles();
-  const { drivers } = useDrivers();
-  const { vendors } = useVendors();
+  console.log('AddEditTrip rendered with:', { id, state, pathname: location.pathname });
   
-  const [initialData, setInitialData] = useState<Partial<CreateTripData>>();
+  const { createTrip, updateTrip, getTrip, trips, loading } = useTrips();
+  const { vehicles, loading: vehiclesLoading } = useVehicles();
+  const { drivers, loading: driversLoading } = useDrivers();
+  const { vendors, loading: vendorsLoading } = useVendors();
+  
+  const [initialData, setInitialData] = useState<any>(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (isEdit && id) {
-      const loadTrip = async () => {
-        const trip = await getTrip(id);
-        if (trip) {
-          setInitialData({
-            tripDescription: trip.tripDescription,
-            tripDate: trip.tripDate,
-            vehicle: trip.vehicle?.id,
-            driver: trip.driver?.id,
-            luggage: trip.luggage,
-            refreshments: trip.refreshments,
-            bookingAmount: trip.bookingMinimumAmount,
-            totalTripAmount: trip.totalTripAmount,
-            from: trip.from,
-            to: trip.to,
-            stops: trip.stops,
-            returnTrip: trip.returnTrip ? {
-              isReturnTrip: trip.returnTrip.isReturnTrip,
-              vendor: vendors[0]?.id || '',
-              from: trip.returnTrip.from,
-              to: trip.returnTrip.to,
-              duration: 0,
-              tripDate: trip.returnTrip.tripDate,
-              vehicle: trip.vehicle?.id || '',
-              driver: trip.driver?.id || '',
-              luggage: trip.luggage,
-              stops: trip.returnTrip.stops,
-              tripDescription: trip.tripDescription,
-              totalTripAmount: trip.totalTripAmount,
-              refreshments: trip.refreshments,
-              bookingAmount: trip.bookingMinimumAmount,
-              fares: trip.returnTrip.fares.fares,
-            } : undefined,
-          });
+    const loadTrip = async () => {
+      try {
+        setDataLoading(true);
+        
+        if (state) {
+          // Use state data if available
+          console.log('Using state data:', state);
+          setInitialData(state);
+          setIsReady(true);
+        } else if (id) {
+          // Fetch trip data
+          console.log('Fetching trip with ID:', id);
+          const trip = await getTrip(id);
+          console.log('Fetched trip data:', trip);
+          if (trip) {
+            setInitialData(trip);
+            setIsReady(true);
+          } else {
+            console.error('Trip not found');
+            //navigate(ROUTES.TRIPS);
+          }
+        } else {
+          // Add mode
+          console.log('Add mode - no initial data needed');
+          setInitialData({});
+          setIsReady(true);
         }
-      };
+      } catch (error) {
+        console.error('Error loading trip:', error);
+        navigate(ROUTES.TRIPS);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    // Only load trip if we have the required data sources loaded
+    if (!vehiclesLoading && !driversLoading && !vendorsLoading) {
       loadTrip();
     }
-  }, [isEdit, id, getTrip]);
+  }, [id, state, getTrip, navigate, vehiclesLoading, driversLoading, vendorsLoading]);
 
-  const handleSubmit = async (data: CreateTripData) => {
+  const handleSubmit = async (data: any) => {
+    console.log('Form submitted with data:', data);
     try {
-      if (isEdit && id) {
-        await updateTrip(id, data);
+      if (id || state?.id) {
+        const tripId = id || state.id;
+        console.log('Updating trip with ID:', tripId);
+        await updateTrip(tripId, data);
       } else {
+        console.log('Creating new trip');
         await createTrip(data);
       }
       navigate(ROUTES.TRIPS);
@@ -72,6 +82,36 @@ export const AddEditTrip: React.FC = () => {
       console.error('Error saving trip:', error);
     }
   };
+
+  const getPageTitle = () => {
+    if (state) return 'Edit Trip (from state)';
+    if (id) return 'Edit Trip (from ID)';
+    return 'Add New Trip';
+  };
+
+  // Show loading while any required data is loading
+  if (vehiclesLoading || driversLoading || vendorsLoading || dataLoading || !isReady) {
+    return <PageLoading />;
+  }
+
+  // Don't render until we have all required data
+  if (vendors.length === 0 || vehicles.length === 0 || drivers.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Missing Required Data</h2>
+          <p className="text-gray-600">Unable to load vehicles, drivers, or vendors.</p>
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.TRIPS)}
+            className="mt-4"
+          >
+            Back to Trips
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -82,18 +122,20 @@ export const AddEditTrip: React.FC = () => {
           onClick={() => navigate(ROUTES.TRIPS)}
         />
         <h1 className="text-2xl font-bold text-gray-900">
-          {isEdit ? 'Edit Trip' : 'Add New Trip'}
+          {getPageTitle()}
         </h1>
       </div>
 
       <TripForm
         initialData={initialData}
+        trips={trips}
         vehicles={vehicles}
         drivers={drivers}
-        vendors={vendors}
+        vendor={vendors[0]}
         onSubmit={handleSubmit}
         loading={loading}
-        isEdit={isEdit}
+        setDateAuto={id?true:false}
+        isEdit={!!id || !!state}
       />
     </div>
   );

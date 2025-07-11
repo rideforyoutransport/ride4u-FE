@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { tripsService } from '../services';
-import type { Trip, CreateTripData } from '../types';
+import type { Trip } from '../types';
 import toast from 'react-hot-toast';
 
 export const useTrips = () => {
@@ -14,17 +14,34 @@ export const useTrips = () => {
       setError(null);
       const response = await tripsService.getAll();
       if (response.success) {
-        setTrips(response.result);
+        // Process trips to add name property like in original code
+        const processedTrips = (Array.isArray(response.result) ? response.result : []).map((trip: any) => {
+          let tripName = '';
+          if (trip.returnTrip) {
+            tripName = `${trip.from?.name || 'Unknown'} - ${trip.to?.name || 'Unknown'} - ${trip.from?.name || 'Unknown'}`;
+          } else {
+            tripName = `${trip.from?.name || 'Unknown'} - ${trip.to?.name || 'Unknown'}`;
+          }
+          return {
+            ...trip,
+            name: tripName
+          };
+        });
+        setTrips(processedTrips);
+      } else {
+        setTrips([]);
       }
     } catch (err: any) {
+      console.error('Error fetching trips:', err);
       setError(err.message);
+      setTrips([]);
       toast.error('Failed to fetch trips');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const getTrip = useCallback(async (id: string): Promise<Trip | null> => {
+  const getTrip = useCallback(async (id: string): Promise<any | null> => {
     try {
       const response = await tripsService.getById(id);
       if (response.success) {
@@ -32,12 +49,13 @@ export const useTrips = () => {
       }
       return null;
     } catch (err: any) {
+      console.error('Error fetching trip:', err);
       toast.error('Failed to fetch trip');
       return null;
     }
   }, []);
 
-  const createTrip = useCallback(async (data: CreateTripData) => {
+  const createTrip = useCallback(async (data: any) => {
     try {
       setLoading(true);
       const response = await tripsService.create(data);
@@ -45,8 +63,11 @@ export const useTrips = () => {
         toast.success('Trip created successfully');
         await fetchTrips(); // Refresh the list
         return response.result;
+      } else {
+        throw new Error('Failed to create trip');
       }
     } catch (err: any) {
+      console.error('Error creating trip:', err);
       toast.error('Failed to create trip');
       throw err;
     } finally {
@@ -54,7 +75,7 @@ export const useTrips = () => {
     }
   }, [fetchTrips]);
 
-  const updateTrip = useCallback(async (id: string, data: CreateTripData) => {
+  const updateTrip = useCallback(async (id: string, data: any) => {
     try {
       setLoading(true);
       const response = await tripsService.update(id, data);
@@ -62,8 +83,11 @@ export const useTrips = () => {
         toast.success('Trip updated successfully');
         await fetchTrips(); // Refresh the list
         return response.result;
+      } else {
+        throw new Error('Failed to update trip');
       }
     } catch (err: any) {
+      console.error('Error updating trip:', err);
       toast.error('Failed to update trip');
       throw err;
     } finally {
@@ -77,9 +101,27 @@ export const useTrips = () => {
       if (response.success) {
         toast.success('Trip deleted successfully');
         await fetchTrips(); // Refresh the list
+      } else {
+        throw new Error('Failed to delete trip');
       }
     } catch (err: any) {
+      console.error('Error deleting trip:', err);
       toast.error('Failed to delete trip');
+    }
+  }, [fetchTrips]);
+
+  const deleteMultipleTrips = useCallback(async (ids: string[]) => {
+    try {
+      const response = await tripsService.deleteMultiple(ids);
+      if (response.success) {
+        toast.success(`${ids.length} trip(s) deleted successfully`);
+        await fetchTrips(); // Refresh the list
+      } else {
+        throw new Error('Failed to delete trips');
+      }
+    } catch (err: any) {
+      console.error('Error deleting trips:', err);
+      toast.error('Failed to delete trips');
     }
   }, [fetchTrips]);
 
@@ -96,5 +138,6 @@ export const useTrips = () => {
     createTrip,
     updateTrip,
     deleteTrip,
+    deleteMultipleTrips,
   };
 };

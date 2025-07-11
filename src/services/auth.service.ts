@@ -1,5 +1,6 @@
 import { apiService } from './api';
 import { LoginCredentials, ChangePasswordData } from '../types';
+import { storage } from '../utils/crypto';
 
 export const authService = {
   async login(credentials: LoginCredentials) {
@@ -8,8 +9,8 @@ export const authService = {
   },
 
   async changePassword(data: ChangePasswordData) {
-    const adminId = localStorage.getItem('adminId');
-    const response = await apiService.put(`/changepassword/${adminId}`, data);
+    const adminId = storage.get('adminId');
+    const response = await apiService.post(`/changepassword/${adminId}`, data);
     return response;
   },
 

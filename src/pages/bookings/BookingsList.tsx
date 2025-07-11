@@ -13,11 +13,6 @@ export const BookingsList: React.FC = () => {
   // Fix: Type the columns properly for the DataTable
   const columns = [
     {
-      key: 'id',
-      header: 'Booking ID',
-      render: (booking: any) => `#${booking.id}`,
-    },
-    {
       key: 'route',
       header: 'Route',
       render: (booking: any) => 

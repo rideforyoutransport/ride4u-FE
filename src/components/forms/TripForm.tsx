@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Select } from '../../components/ui';
 import { Card, CardContent, CardHeader } from '../../components/ui';
-import { GoogleAutocomplete, DateTimePicker } from '../../components/common';
-import { CreateTripData, Location, Fare, Vehicle, Driver, Vendor } from '../../types';
-import { LUGGAGE_TYPES } from '../../utils/constants';
-import { X, MapPin } from 'lucide-react';
+import { Vehicle, Driver, Vendor } from '../../types';
+import { X, MapPin, Plus, Calendar, Car, User, Package, Coffee, RotateCcw, Copy } from 'lucide-react';
+import dayjs from 'dayjs';
+import { GoogleAutocomplete } from '../common/GoogleAutocomplete';
 
 const tripSchema = z.object({
   tripDescription: z.string().min(1, 'Trip description is required'),
@@ -16,7 +16,6 @@ const tripSchema = z.object({
   driver: z.string().min(1, 'Driver selection is required'),
   luggage: z.array(z.string()).min(1, 'At least one luggage type must be selected'),
   refreshments: z.boolean(),
-  totalTripAmount: z.number().min(0, 'Amount must be positive'),
   bookingAmount: z.number().min(1, 'Booking amount must be at least 1'),
   returnTrip: z.boolean(),
   returnTripDate: z.string().optional(),
@@ -25,74 +24,44 @@ const tripSchema = z.object({
 type TripFormData = z.infer<typeof tripSchema>;
 
 interface TripFormProps {
-  initialData?: Partial<CreateTripData>;
+  initialData?: any;
   vehicles: Vehicle[];
   drivers: Driver[];
-  vendors: Vendor[];
-  onSubmit: (data: CreateTripData) => Promise<void>;
+  vendor: Vendor;
+  trips?: any[]; // Add trips prop for copy functionality
+  onSubmit: (data: any) => Promise<void>;
   loading?: boolean;
   isEdit?: boolean;
+  setDateAuto?: boolean;
 }
 
 export const TripForm: React.FC<TripFormProps> = ({
   initialData,
   vehicles,
   drivers,
-  vendors,
+  vendor,
+  setDateAuto,
+  trips = [],
   onSubmit,
   loading = false,
   isEdit = false,
 }) => {
-  const [from, setFrom] = useState<Location | null>(null);
-  const [to, setTo] = useState<Location | null>(null);
-  const [stops, setStops] = useState<Location[]>([]);
-  const [returnStops, setReturnStops] = useState<Location[]>([]);
+  // State from original logic
+  const [from, setFrom] = useState<any>({});
+  const [to, setTo] = useState<any>({});
+  const [stops, setStops] = useState<any[]>([]);
+  const [fromReturn, setFromReturn] = useState<any>({});
+  const [toReturn, setToReturn] = useState<any>({});
+  const [stopsReturn, setStopsReturn] = useState<any[]>([]);
+  const [allPossibleFares, setAllPossibleFares] = useState<any[]>([]);
+  const [allPossibleFaresReturn, setAllPossibleFaresReturn] = useState<any[]>([]);
+  const [stopInputValue, setStopInputValue] = useState('');
+  const [selectedTrip, setSelectedTrip] = useState<any>({});
 
-  // Wrapper functions to handle type conversion
-  const handleFromSelected = (place: any) => {
-    setFrom({
-      lat: place.lat,
-      lng: place.lng,
-      place_id: place.place_id,
-      place_name: place.place_name,
-      name: place.name || place.place_name,
-    });
-  };
-
-  const handleToSelected = (place: any) => {
-    setTo({
-      lat: place.lat,
-      lng: place.lng,
-      place_id: place.place_id,
-      place_name: place.place_name,
-      name: place.name || place.place_name,
-    });
-  };
-
-  const handleStopSelected = (place: any) => {
-    const location: Location = {
-      lat: place.lat,
-      lng: place.lng,
-      place_id: place.place_id,
-      place_name: place.place_name,
-      name: place.name || place.place_name,
-    };
-    addStop(location);
-  };
-
-  const handleReturnStopSelected = (place: any) => {
-    const location: Location = {
-      lat: place.lat,
-      lng: place.lng,
-      place_id: place.place_id,
-      place_name: place.place_name,
-      name: place.name || place.place_name,
-    };
-    addReturnStop(location);
-  };
-  const [fares, setFares] = useState<Fare[]>([]);
-  const [returnFares, setReturnFares] = useState<Fare[]>([]);
-  const [showReturnTrip, setShowReturnTrip] = useState(false);
+  // Input states for location fields
+  const [fromInput, setFromInput] = useState('');
+  const [toInput, setToInput] = useState('');
+  const [stopInput, setStopInput] = useState('');
 
   const {
     control,
@@ -108,192 +77,282 @@ export const TripForm: React.FC<TripFormProps> = ({
       refreshments: false,
       returnTrip: false,
       luggage: [],
-      totalTripAmount: 0,
       bookingAmount: 1,
+      tripDescription: '',
+      tripDate: '',
+      vehicle: '',
+      driver: '',
     },
   });
 
   const watchReturnTrip = watch('returnTrip');
 
+  // Copy values from previous trip function
+  const setValues = (trip: any, vehicles: any[], drivers: any[], vendors: any[]) => {
+    console.log('Copying values from trip:', trip);
+
+    // Set form values
+    reset({
+      tripDescription: trip.tripDescription || '',
+      tripDate: setDateAuto? trip.tripDate: '',
+      vehicle: trip.vehicle?.id || '',
+      driver: trip.driver?.id || '',
+      luggage: trip.luggage || [],
+      refreshments: trip.refreshments || false,
+      bookingAmount: trip.bookingAmount || trip.bookingMinimumAmount || 1,
+      returnTrip: !!trip.returnTrip,
+      returnTripDate: setDateAuto? trip.returnTrip.tripDate: '',
+    });
+
+    // Set locations for main trip
+    if (trip.from) {
+      const fromData = {
+        ...trip.from,
+        lat: trip.from.geoLocation?.lat || trip.from.lat,
+        lng: trip.from.geoLocation?.lng || trip.from.lng,
+        place_name: trip.from.name,
+        place_id: trip.from.place_id || trip.from.id,
+      };
+      setFrom(fromData);
+      setFromInput(fromData.place_name || fromData.name || '');
+    }
+
+    if (trip.to) {
+      const toData = {
+        ...trip.to,
+        lat: trip.to.geoLocation?.lat || trip.to.lat,
+        lng: trip.to.geoLocation?.lng || trip.to.lng,
+        place_name: trip.to.name,
+        place_id: trip.to.place_id || trip.to.id,
+      };
+      setTo(toData);
+      setToInput(toData.place_name || toData.name || '');
+    }
+
+    // Set stops
+    if (trip.stops) {
+      const stopsData = trip.stops.map((stop: any) => ({
+        ...stop,
+        lat: stop.geoLocation?.lat || stop.lat,
+        lng: stop.geoLocation?.lng || stop.lng,
+        place_name: stop.name,
+        place_id: stop.place_id || stop.id,
+      }));
+      setStops(stopsData);
+    }
+
+    // Set fares
+    if (trip.fares?.fares) {
+      setAllPossibleFares([...trip.fares.fares]);
+    }
+
+    // Set return trip data if exists
+    if (trip.returnTrip) {
+      const returnFromData = {
+        ...trip.returnTrip.from,
+        lat: trip.returnTrip.from.geoLocation?.lat,
+        lng: trip.returnTrip.from.geoLocation?.lng,
+        place_name: trip.returnTrip.from.name,
+        place_id: trip.returnTrip.from.place_id || trip.returnTrip.from.id,
+      };
+      setFromReturn(returnFromData);
+
+      const returnToData = {
+        ...trip.returnTrip.to,
+        lat: trip.returnTrip.to.geoLocation?.lat,
+        lng: trip.returnTrip.to.geoLocation?.lng,
+        place_name: trip.returnTrip.to.name,
+        place_id: trip.returnTrip.to.place_id || trip.returnTrip.to.id,
+      };
+      setToReturn(returnToData);
+
+      const returnStopsData = trip.returnTrip.stops?.map((stop: any) => ({
+        ...stop,
+        lat: stop.geoLocation?.lat,
+        lng: stop.geoLocation?.lng,
+        place_name: stop.name,
+        place_id: stop.place_id || stop.id,
+      })) || [];
+      setStopsReturn(returnStopsData);
+
+      if (trip.returnTrip.fares?.fares) {
+        setAllPossibleFaresReturn([...trip.returnTrip.fares.fares]);
+      }
+    }
+  };
+
+  // Handle trip selection for copying
+  const handleTripSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    event.preventDefault();
+    if (event.target.value !== '') {
+      const trip = trips.find((trip) => trip.id === event.target.value);
+      if (trip) {
+        setSelectedTrip(trip);
+        setValues(trip, vehicles, drivers, [vendor]);
+      }
+    }
+  };
+
+  // Load initial data
   useEffect(() => {
-    setShowReturnTrip(watchReturnTrip);
-    if (watchReturnTrip && from && to) {
-      // Auto-populate return trip stops (reversed)
-      setReturnStops([...stops].reverse());
-      generateReturnFares();
+    if (initialData) {
+      console.log('Loading initial data:', initialData);
+      setValues(initialData, vehicles, drivers, [vendor]);
+    }
+  }, [initialData, reset]);
+
+  // Generate fares when route changes (original logic)
+  useEffect(() => {
+    if (from.place_id && to.place_id && !isEdit) {
+      generateFares();
+    }
+  }, [stops, from, to, isEdit]);
+
+  // Set return stops when return trip is enabled
+  useEffect(() => {
+    if (watchReturnTrip && from.place_id && to.place_id) {
+      setStopsReturn([...stops].reverse());
+      setFromReturn(to);
+      setToReturn(from);
+
+      // Generate return fares immediately
+      if (!isEdit) {
+        setTimeout(() => generateReturnFares(), 100);
+      }
     }
   }, [watchReturnTrip, from, to, stops]);
 
-  useEffect(() => {
-    if (from && to) {
-      generateFares();
-    }
-  }, [from, to, stops]);
-
-  useEffect(() => {
-    if (initialData) {
-      populateInitialData();
-    }
-  }, [initialData]);
-
-  const populateInitialData = () => {
-    if (!initialData) return;
-
-    // Set form values
-    if (initialData.tripDescription) setValue('tripDescription', initialData.tripDescription);
-    if (initialData.tripDate) setValue('tripDate', initialData.tripDate);
-    if (initialData.vehicle) setValue('vehicle', initialData.vehicle);
-    if (initialData.driver) setValue('driver', initialData.driver);
-    if (initialData.luggage) setValue('luggage', initialData.luggage);
-    if (initialData.refreshments !== undefined) setValue('refreshments', initialData.refreshments);
-    if (initialData.totalTripAmount) setValue('totalTripAmount', initialData.totalTripAmount);
-    if (initialData.bookingAmount) setValue('bookingAmount', initialData.bookingAmount);
-    if (initialData.returnTrip) setValue('returnTrip', !!initialData.returnTrip);
-
-    // Set locations
-    if (initialData.from) setFrom(initialData.from);
-    if (initialData.to) setTo(initialData.to);
-    if (initialData.stops) setStops(initialData.stops);
-    if (initialData.fares) setFares(initialData.fares);
-  };
-
   const generateFares = () => {
-    if (!from || !to) return;
+    let tempFareObj: any[] = [];
+    let stopsCurr = [from, ...stops, to];
 
-    const allStops = [from, ...stops, to];
-    const newFares: Fare[] = [];
-
-    for (let i = 0; i < allStops.length; i++) {
-      for (let j = i + 1; j < allStops.length; j++) {
-        const fare: Fare = {
-          from: {
-            name: allStops[i].place_name || allStops[i].name || '',
-            place_id: allStops[i].place_id,
-          },
-          to: {
-            name: allStops[j].place_name || allStops[j].name || '',
-            place_id: allStops[j].place_id,
-          },
-          fare: i === 0 && j === allStops.length - 1 ? '1' : '0',
-          hidden: false,
-          master: i === 0 && j === allStops.length - 1,
-        };
-        newFares.push(fare);
+    for (let index = 0; index < stopsCurr.length; index++) {
+      for (let j = index + 1; j < stopsCurr.length; j++) {
+        let element;
+        if (stopsCurr[index].place_id === from.place_id && stopsCurr[j].place_id === to.place_id) {
+          element = {
+            from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+            to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+            fare: "1",
+            hidden: false,
+            master: true
+          };
+        } else {
+          element = {
+            from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+            to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+            fare: "0",
+            hidden: false,
+            master: false
+          };
+        }
+        tempFareObj.push(element);
       }
     }
-
-    setFares(newFares);
+    setAllPossibleFares(tempFareObj);
   };
 
   const generateReturnFares = () => {
-    if (!from || !to) return;
+    let tempFareObj: any[] = [];
+    let stopsCurr = [fromReturn, ...stopsReturn, toReturn];
 
-    const allStops = [to, ...returnStops, from];
-    const newReturnFares: Fare[] = [];
-
-    for (let i = 0; i < allStops.length; i++) {
-      for (let j = i + 1; j < allStops.length; j++) {
-        const fare: Fare = {
-          from: {
-            name: allStops[i].place_name || allStops[i].name || '',
-            place_id: allStops[i].place_id,
-          },
-          to: {
-            name: allStops[j].place_name || allStops[j].name || '',
-            place_id: allStops[j].place_id,
-          },
-          fare: i === 0 && j === allStops.length - 1 ? '1' : '0',
-          hidden: false,
-          master: i === 0 && j === allStops.length - 1,
-        };
-        newReturnFares.push(fare);
+    for (let index = 0; index < stopsCurr.length; index++) {
+      for (let j = index + 1; j < stopsCurr.length; j++) {
+        let element;
+        if (stopsCurr[index].place_id === fromReturn.place_id && stopsCurr[j].place_id === toReturn.place_id) {
+          element = {
+            from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+            to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+            fare: "1",
+            hidden: false,
+            master: true
+          };
+        } else {
+          element = {
+            from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+            to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+            fare: "0",
+            hidden: false,
+            master: false
+          };
+        }
+        tempFareObj.push(element);
       }
     }
-
-    setReturnFares(newReturnFares);
+    setAllPossibleFaresReturn(tempFareObj);
   };
 
-  const addStop = (location: Location) => {
-    setStops([...stops, location]);
+  const removeFromStops = (stopToRemove: any) => {
+    setStops(stops.filter(stop => stop !== stopToRemove));
   };
 
-  const removeStop = (index: number) => {
-    const newStops = stops.filter((_, i) => i !== index);
-    setStops(newStops);
+  const setFare = (event: any, idx: number) => {
+    let allPossibleFaresTemp = [...allPossibleFares];
+    allPossibleFaresTemp[idx].fare = event.target.value.toString();
+    setAllPossibleFares(allPossibleFaresTemp);
   };
 
-  const addReturnStop = (location: Location) => {
-    setReturnStops([...returnStops, location]);
+  const setFareReturn = (event: any, idx: number) => {
+    let allPossibleFaresTemp = [...allPossibleFaresReturn];
+    allPossibleFaresTemp[idx].fare = event.target.value.toString();
+    setAllPossibleFaresReturn(allPossibleFaresTemp);
   };
 
-  const removeReturnStop = (index: number) => {
-    const newReturnStops = returnStops.filter((_, i) => i !== index);
-    setReturnStops(newReturnStops);
-  };
-
-  const updateFare = (index: number, value: string, isReturn = false) => {
+  const updateHiddenFares = (idx: number, isReturn: boolean) => {
     if (isReturn) {
-      const newFares = [...returnFares];
-      newFares[index].fare = value;
-      setReturnFares(newFares);
+      let allPossibleFaresTemp = [...allPossibleFaresReturn];
+      allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
+      setAllPossibleFaresReturn(allPossibleFaresTemp);
     } else {
-      const newFares = [...fares];
-      newFares[index].fare = value;
-      setFares(newFares);
-    }
-  };
-
-  const toggleFareVisibility = (index: number, isReturn = false) => {
-    if (isReturn) {
-      const newFares = [...returnFares];
-      newFares[index].hidden = !newFares[index].hidden;
-      setReturnFares(newFares);
-    } else {
-      const newFares = [...fares];
-      newFares[index].hidden = !newFares[index].hidden;
-      setFares(newFares);
+      let allPossibleFaresTemp = [...allPossibleFares];
+      allPossibleFaresTemp[idx].hidden = !allPossibleFaresTemp[idx].hidden;
+      setAllPossibleFares(allPossibleFaresTemp);
     }
   };
 
   const onSubmitForm = async (data: TripFormData) => {
-    if (!from || !to) {
+    if (!from.place_id || !to.place_id) {
       alert('Please select origin and destination');
       return;
     }
 
-    const tripData: CreateTripData = {
-      ...data,
+    const tripData = {
+      vendor: vendor.id,
       from,
       to,
-      stops,
-      fares,
       duration: 0,
+      tripDate: data.tripDate,
+      vehicle: data.vehicle,
+      driver: data.driver,
+      luggage: data.luggage,
+      stops,
+      tripDescription: data.tripDescription,
+      totalTripAmount: 0,
+      refreshments: data.refreshments,
+      bookingAmount: data.bookingAmount,
       returnTrip: data.returnTrip ? {
         isReturnTrip: true,
-        vendor: vendors[0]?.id || '',
-        from: to,
-        to: from,
+        vendor: vendor.id,
+        from: fromReturn,
+        to: toReturn,
         duration: 0,
         tripDate: data.returnTripDate || data.tripDate,
         vehicle: data.vehicle,
         driver: data.driver,
         luggage: data.luggage,
-        stops: returnStops,
+        stops: stopsReturn,
         tripDescription: data.tripDescription,
-        totalTripAmount: data.totalTripAmount,
+        totalTripAmount: 0,
         refreshments: data.refreshments,
         bookingAmount: data.bookingAmount,
-        fares: returnFares,
-      } : undefined,
+        fares: allPossibleFaresReturn,
+      } : null,
+      fares: allPossibleFares,
     };
 
+    console.log('Submitting trip data:', tripData);
     await onSubmit(tripData);
   };
-
-  const luggageOptions = LUGGAGE_TYPES.map(type => ({
-    value: type.value,
-    label: type.label,
-  }));
 
   const vehicleOptions = vehicles.map(vehicle => ({
     value: vehicle.id,
@@ -302,219 +361,408 @@ export const TripForm: React.FC<TripFormProps> = ({
 
   const driverOptions = drivers.map(driver => ({
     value: driver.id,
-    label: `${driver.name} (Rating: ${driver.rating}/5)`,
+    label: driver.name,
   }));
 
+  const luggageOptions = [
+    { value: 's', label: 'Small' },
+    { value: 'm', label: 'Medium' },
+    { value: 'l', label: 'Large' },
+  ];
+
+  // Prepare trips for select dropdown
+  const tripOptions = trips.map(trip => {
+    const tripName = trip.returnTrip
+      ? `${trip.from?.name} - ${trip.to?.name} - ${trip.from?.name}`
+      : `${trip.from?.name} - ${trip.to?.name}`;
+
+    return {
+      value: trip.id,
+      label: tripName || `Trip ${trip.id}`,
+    };
+  });
+
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <h2 className="text-lg font-semibold">
-            {isEdit ? 'Edit Trip' : 'Create New Trip'}
-          </h2>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Trip Description"
-              {...register('tripDescription')}
-              error={errors.tripDescription?.message}
-            />
-
-            <Controller
-              name="tripDate"
-              control={control}
-              render={({ field }) => (
-                <DateTimePicker
-                  label="Trip Date"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.tripDate?.message}
+    <div className="max-w-6xl mx-auto">
+      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-8">
+        {/* Copy Previous Trip Card - Only show when not editing */}
+        {!isEdit && trips.length > 0 && (
+          <Card className="shadow-lg border-0 bg-white">
+            <CardHeader className="bg-white text-black rounded-t-lg">
+              <h2 className="text-xl font-bold flex items-center">
+                <Copy className="w-6 h-6 mr-3" />
+                Copy from Previous Trip
+              </h2>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="max-w-md">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Select a trip to copy values from
+                </label>
+                <Select
+                  value={selectedTrip.id || ''}
+                  onChange={handleTripSelect}
+                  options={[{ value: '', label: 'Select Previous Trip' }, ...tripOptions]}
+                  className="text-lg"
                 />
-              )}
-            />
-          </div>
-
-          {/* Locations */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Origin <span className="text-red-500">*</span>
-              </label>
-              <GoogleAutocomplete
-                placeholder="Select origin location"
-                value={from?.place_name || ''}
-                onPlaceSelected={handleFromSelected}
-                error={!from ? 'Origin is required' : ''}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Destination <span className="text-red-500">*</span>
-              </label>
-              <GoogleAutocomplete
-                placeholder="Select destination location"
-                value={to?.place_name || ''}
-                onPlaceSelected={handleToSelected}
-                error={!to ? 'Destination is required' : ''}
-              />
-            </div>
-          </div>
-
-          {/* Stops */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Stops
-            </label>
-            <div className="space-y-2">
-              {stops.map((stop, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="flex-1 text-sm">{stop.place_name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeStop(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              <GoogleAutocomplete
-                placeholder="Add a stop"
-                onPlaceSelected={handleStopSelected}
-              />
-            </div>
-          </div>
-
-          {/* Vehicle and Driver Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              label="Vehicle"
-              {...register('vehicle')}
-              options={[{ value: '', label: 'Select Vehicle' }, ...vehicleOptions]}
-              error={errors.vehicle?.message}
-            />
-
-            <Select
-              label="Driver"
-              {...register('driver')}
-              options={[{ value: '', label: 'Select Driver' }, ...driverOptions]}
-              error={errors.driver?.message}
-            />
-          </div>
-
-          {/* Trip Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Luggage Types <span className="text-red-500">*</span>
-              </label>
-              <div className="space-y-2">
-                {luggageOptions.map((option) => (
-                  <label key={option.value} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      value={option.value}
-                      {...register('luggage')}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span className="ml-2 text-sm">{option.label}</span>
-                  </label>
-                ))}
+                <p className="text-sm text-gray-600 mt-2">
+                  This will copy all trip details including locations, vehicle, driver and fare.
+                </p>
               </div>
-              {errors.luggage && (
-                <p className="text-sm text-red-600 mt-1">{errors.luggage.message}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Route Information Card */}
+        <Card className="shadow-lg border-0 bg-white">
+          <CardHeader className="bg-white text-black rounded-t-lg">
+            <h2 className="text-xl font-bold flex items-center">
+              <MapPin className="w-6 h-6 mr-3" />
+              Route Information
+            </h2>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            {/* Origin and Destination */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <MapPin className="w-4 h-4 inline mr-2 text-green-600" />
+                  Origin <span className="text-red-500">*</span>
+                </label>
+                <GoogleAutocomplete
+                  value={fromInput}
+                  onChange={(value) => setFromInput(value)}
+                  onPlaceSelected={(place) => {
+                    const fromData = {
+                      lat: place.lat,
+                      lng: place.lng,
+                      place_id: place.place_id,
+                      place_name: place.place_name,
+                      name: place.name
+                    };
+                    setFrom(fromData);
+                    setFromInput(place.place_name);
+                    console.log('Origin selected:', fromData);
+                  }}
+                  placeholder="Enter origin location"
+                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {from.place_name && (
+                  <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-green-800">
+                    <MapPin className="w-4 h-4 inline mr-2" />
+                    {from.place_name}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <MapPin className="w-4 h-4 inline mr-2 text-green-600" />
+                  Destination <span className="text-red-500">*</span>
+                </label>
+                <GoogleAutocomplete
+                  value={toInput}
+                  onChange={(value) => setToInput(value)}
+                  onPlaceSelected={(place) => {
+                    const toData = {
+                      lat: place.lat,
+                      lng: place.lng,
+                      place_id: place.place_id,
+                      place_name: place.place_name,
+                      name: place.name
+                    };
+                    setTo(toData);
+                    setToInput(place.place_name);
+                    console.log('Destination selected:', toData);
+                  }}
+                  placeholder="Enter destination location"
+                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {to.place_name && (
+                  <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-green-800">
+                    <MapPin className="w-4 h-4 inline mr-2" />
+                    {to.place_name}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Stops */}
+            <div className="space-y-4">
+              <label className="block text-sm font-semibold text-gray-700">
+                <Plus className="w-4 h-4 inline mr-2 text-blue-600" />
+                Stops (Optional)
+              </label>
+
+              {stops.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {stops.map((stop: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between bg-blue-100 border border-blue-300 rounded-lg p-3">
+                      <div className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">{stop.place_name}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFromStops(stop)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               )}
+
+              <GoogleAutocomplete
+                value={stopInputValue}
+                onChange={(value) => setStopInputValue(value)}
+                onPlaceSelected={(place) => {
+                  console.log('Place selected for stop:', place);
+
+                  const stopData = {
+                    lat: place.lat,
+                    lng: place.lng,
+                    place_id: place.place_id,
+                    place_name: place.place_name,
+                    name: place.name
+                  };
+
+                  // Check if stop already exists
+                  const exists = stops.some(stop => stop.place_id === stopData.place_id);
+                  if (!exists) {
+                    setStops(prev => [...prev, stopData]);
+                    console.log('Stop added successfully:', stopData);
+                  } else {
+                    console.log('Stop already exists');
+                  }
+
+                  // Clear the input
+                  setStopInputValue('');
+                }}
+                placeholder="Add a stop location"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Rest of the form components remain the same... */}
+        {/* Trip Details Card */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-white text-black rounded-t-lg">
+            <h2 className="text-xl font-bold flex items-center">
+              <Calendar className="w-6 h-6 mr-3" />
+              Trip Details
+            </h2>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Trip Description"
+                {...register('tripDescription')}
+                error={errors.tripDescription?.message}
+                className="px-4 py-3 text-lg"
+                placeholder="Describe the trip purpose"
+              />
+
+              <Controller
+                name="tripDate"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <Calendar className="w-4 h-4 inline mr-2" />
+                      Trip Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                      value={field.value ? dayjs(field.value).format('YYYY-MM-DDTHH:mm') : ''}
+                      onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                    />
+                    {errors.tripDate && (
+                      <p className="text-sm text-red-600 mt-1">{errors.tripDate.message}</p>
+                    )}
+                  </div>
+                )}
+              />
             </div>
 
-            <div className="flex items-center">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  {...register('refreshments')}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="ml-2 text-sm font-medium">Refreshments Available</span>
-              </label>
-            </div>
-
-            <div className="flex items-center">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  {...register('returnTrip')}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="ml-2 text-sm font-medium">Return Trip</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Pricing */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Total Trip Amount"
-              type="number"
-              min="0"
-              step="0.01"
-              {...register('totalTripAmount', { valueAsNumber: true })}
-              error={errors.totalTripAmount?.message}
-            />
-
-            <Input
-              label="Booking Amount"
+              label="Booking Amount ($)"
               type="number"
               min="1"
-              step="0.01"
               {...register('bookingAmount', { valueAsNumber: true })}
               error={errors.bookingAmount?.message}
+              className="px-4 py-3 text-lg max-w-md"
+              placeholder="Minimum booking amount"
             />
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Fares Table */}
-          {fares.length > 0 && (
-            <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Fare Structure</h3>
+        {/* Vehicle & Driver Card */}
+        // Replace the Vehicle and Driver selection sections with this:
+
+        {/* Vehicle & Driver Card */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-white text-black rounded-t-lg">
+            <h2 className="text-xl font-bold flex items-center">
+              <Car className="w-6 h-6 mr-3" />
+              Vehicle & Driver Assignment
+            </h2>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Car className="w-4 h-4 inline mr-2" />
+                  Vehicle <span className="text-red-500">*</span>
+                </label>
+                <Controller
+                  name="vehicle"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={[{ value: '', label: 'Select Vehicle' }, ...vehicleOptions]}
+                      error={errors.vehicle?.message}
+                      className="text-lg"
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <User className="w-4 h-4 inline mr-2" />
+                  Driver <span className="text-red-500">*</span>
+                </label>
+                <Controller
+                  name="driver"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={[{ value: '', label: 'Select Driver' }, ...driverOptions]}
+                      error={errors.driver?.message}
+                      className="text-lg"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Options & Preferences Card */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-white text-black rounded-t-lg">
+            <h2 className="text-xl font-bold flex items-center">
+              <Package className="w-6 h-6 mr-3" />
+              Trip Options & Preferences
+            </h2>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Luggage Types */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-4">
+                  <Package className="w-4 h-4 inline mr-2" />
+                  Luggage Types <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-3">
+                  {luggageOptions.map((option) => (
+                    <label key={option.value} className="flex items-center p-3 border-2 border-gray-200 rounded-lg hover:border-orange-300 transition-colors cursor-pointer">
+                      <input
+                        type="checkbox"
+                        value={option.value}
+                        {...register('luggage')}
+                        className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mr-3"
+                      />
+                      <span className="text-sm font-medium">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {errors.luggage && (
+                  <p className="text-sm text-red-600 mt-2">{errors.luggage.message}</p>
+                )}
+              </div>
+
+              {/* Additional Options */}
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-4">
+                  Additional Services
+                </label>
+
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register('refreshments')}
+                    className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500 mr-3"
+                  />
+                  <div className="flex items-center">
+                    <Coffee className="w-5 h-5 mr-2 text-green-600" />
+                    <span className="text-sm font-medium">Refreshments Available</span>
+                  </div>
+                </label>
+
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register('returnTrip')}
+                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3"
+                  />
+                  <div className="flex items-center">
+                    <RotateCcw className="w-5 h-5 mr-2 text-blue-600" />
+                    <span className="text-sm font-medium">Return Trip</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fares Table */}
+        {allPossibleFares.length > 0 && (
+          <Card className="shadow-lg border-0">
+            <CardHeader className="bg-white text-black rounded-t-lg">
+              <h3 className="text-xl font-bold">💰 Fare Structure</h3>
+            </CardHeader>
+            <CardContent className="p-8">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        From
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        To
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Fare ($)
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">From</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">To</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Fare ($)</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {fares.map((fare, index) => (
+                    {allPossibleFares.map((fare: any, index: number) => (
                       !fare.hidden && (
-                        <tr key={index} className={fare.master ? 'bg-primary-50' : ''}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <tr key={index} className={`${fare.master ? 'bg-indigo-50 border-l-4 border-indigo-500' : 'hover:bg-gray-50'} transition-colors`}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {fare.master && <span className="text-indigo-600 font-bold mr-2">★</span>}
                             {fare.from.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {fare.to.name}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Input
+                            <input
                               type="number"
                               min={fare.master ? "1" : "0"}
                               step="0.01"
+                              className="w-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg font-semibold"
                               value={fare.fare}
-                              onChange={(e) => updateFare(index, e.target.value)}
-                              className="w-24"
+                              onWheel={(e) => e.currentTarget.blur()}
+                              onChange={(e) => setFare(e, index)}
+                              placeholder="0.00"
                             />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -523,10 +771,15 @@ export const TripForm: React.FC<TripFormProps> = ({
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => toggleFareVisibility(index)}
+                                onClick={() => updateHiddenFares(index, false)}
+                                className="text-red-600 hover:text-red-800 hover:bg-red-50"
                               >
-                                <X className="w-4 h-4" />
+                                <X className="w-4 h-4 mr-1" />
+                                Remove
                               </Button>
+                            )}
+                            {fare.master && (
+                              <span className="text-xs text-indigo-600 font-semibold">Main Route</span>
                             )}
                           </td>
                         </tr>
@@ -535,140 +788,169 @@ export const TripForm: React.FC<TripFormProps> = ({
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Return Trip Section */}
-      {showReturnTrip && (
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold">Return Trip Details</h2>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Controller
-              name="returnTripDate"
-              control={control}
-              render={({ field }) => (
-                <DateTimePicker
-                  label="Return Trip Date"
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  error={errors.returnTripDate?.message}
-                />
-              )}
-            />
-
-            {/* Return Stops */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Return Trip Stops
-              </label>
-              <div className="space-y-2">
-                {returnStops.map((stop, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="flex-1 text-sm">{stop.place_name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeReturnStop(index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+        {/* Return Trip Section */}
+        {watchReturnTrip && (
+          <Card className="shadow-lg border-0 border-l-4 border-blue-500">
+            <CardHeader className="bg-white text-black rounded-t-lg">
+              <h2 className="text-xl font-bold flex items-center">
+                <RotateCcw className="w-6 h-6 mr-3" />
+                Return Trip Details
+              </h2>
+            </CardHeader>
+            <CardContent className="p-8 space-y-6">
+              <Controller
+                name="returnTripDate"
+                control={control}
+                render={({ field }) => (
+                  <div className="max-w-md">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <Calendar className="w-4 h-4 inline mr-2" />
+                      Return Trip Date
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                      value={field.value ? dayjs(field.value).format('YYYY-MM-DDTHH:mm') : ''}
+                      onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                    />
                   </div>
-                ))}
-                <GoogleAutocomplete
-                  placeholder="Add a return stop"
-                  onPlaceSelected={handleReturnStopSelected}
-                />
-              </div>
-            </div>
+                )}
+              />
 
-            {/* Return Fares Table */}
-            {returnFares.length > 0 && (
-              <div>
-                <h3 className="text-md font-medium text-gray-900 mb-3">Return Trip Fare Structure</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          From
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          To
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Fare ($)
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {returnFares.map((fare, index) => (
-                        !fare.hidden && (
-                          <tr key={index} className={fare.master ? 'bg-primary-50' : ''}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {fare.from.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {fare.to.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Input
-                                type="number"
-                                min={fare.master ? "1" : "0"}
-                                step="0.01"
-                                value={fare.fare}
-                                onChange={(e) => updateFare(index, e.target.value, true)}
-                                className="w-24"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {!fare.master && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => toggleFareVisibility(index, true)}
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        )
-                      ))}
-                    </tbody>
-                  </table>
+              {/* Return Route Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h4 className="text-lg font-semibold text-blue-800 mb-4">Return Route</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-blue-600">Return From:</span>
+                    <p className="text-blue-900 font-semibold">{toReturn.place_name || to.place_name || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-blue-600">Return To:</span>
+                    <p className="text-blue-900 font-semibold">{fromReturn.place_name || from.place_name || 'Not set'}</p>
+                  </div>
                 </div>
+                {stopsReturn.length > 0 && (
+                  <div className="mt-4">
+                    <span className="text-sm font-medium text-blue-600">Return Stops:</span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {stopsReturn.map((stop: any, index: number) => (
+                        <span key={index} className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {stop.place_name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Return Trip Fares Table */}
+              {allPossibleFaresReturn.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    💰 Return Trip Fare Structure
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                      <thead className="bg-blue-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-blue-600 uppercase tracking-wider">From</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-blue-600 uppercase tracking-wider">To</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-blue-600 uppercase tracking-wider">Fare ($)</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-blue-600 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {allPossibleFaresReturn.map((fare: any, index: number) => (
+                          !fare.hidden && (
+                            <tr key={index} className={`${fare.master ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'} transition-colors`}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {fare.master && <span className="text-blue-600 font-bold mr-2">★</span>}
+                                {fare.from.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {fare.to.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="number"
+                                  min={fare.master ? "1" : "0"}
+                                  step="0.01"
+                                  onWheel={(e) => e.currentTarget.blur()}
+                                  className="w-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold"
+                                  value={fare.fare}
+                                  onChange={(e) => setFareReturn(e, index)}
+                                  placeholder="0.00"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {!fare.master && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => updateHiddenFares(index, true)}
+                                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                  >
+                                    <X className="w-4 h-4 mr-1" />
+                                    Remove
+                                  </Button>
+                                )}
+                                {fare.master && (
+                                  <span className="text-xs text-blue-600 font-semibold">Main Route</span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Form Actions */}
+        <Card className="shadow-lg border-0">
+          <CardContent className="p-8">
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  reset();
+                  setFrom({});
+                  setTo({});
+                  setStops([]);
+                  setFromInput('');
+                  setToInput('');
+                  setStopInput('');
+                  setStopInputValue('');
+                  setSelectedTrip({});
+                  setAllPossibleFares([]);
+                  setAllPossibleFaresReturn([]);
+                }}
+                className="px-8 py-3 text-lg"
+              >
+                Reset Form
+              </Button>
+              <Button
+                type="submit"
+                loading={loading}
+                className="px-8 py-3 text-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                {isEdit ? '✅ Update Trip' : '🚀 Create Trip'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => reset()}
-        >
-          Reset
-        </Button>
-        <Button
-          type="submit"
-          loading={loading}
-        >
-          {isEdit ? 'Update Trip' : 'Create Trip'}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };

@@ -40,16 +40,16 @@ export const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
       <Input
         label="New Password"
         type="password"
-        {...register('password')}
-        error={errors.password?.message}
+        {...register('newPassword')}
+        error={errors.newPassword?.message}
         helperText="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
       />
 
       <Input
         label="Confirm New Password"
         type="password"
-        {...register('passwordConfirm')}
-        error={errors.passwordConfirm?.message}
+        {...register('newPasswordConfirm')}
+        error={errors.newPasswordConfirm?.message}
       />
 
       <div className="flex justify-end space-x-3">
