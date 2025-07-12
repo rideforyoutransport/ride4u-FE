@@ -4,7 +4,6 @@ import { ArrowLeft, Edit, MapPin, Calendar, Car, User } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent, Badge } from '../../components/ui';
 import { useTrips } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
-import { formatDate, formatCurrency } from '../../utils/formatters';
 import dayjs from 'dayjs';
 
 export const ViewTrip: React.FC = () => {

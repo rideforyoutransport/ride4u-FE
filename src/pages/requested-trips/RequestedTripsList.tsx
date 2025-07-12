@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Check, X, Eye, Clock } from 'lucide-react';
-import { Button, Card, CardHeader, CardContent, Badge } from '../../components/ui';
-import { DataTable, SearchInput } from '../../components/common';
+import React from 'react';
+import { Card, CardContent } from '../../components/ui';
+import { DataTable } from '../../components/common';
 import { useRequestedTrips } from '../../hooks';
-import { formatDate, formatCurrency } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import type { RequestedTrip } from '../../types';
 
 export const RequestedTripsList: React.FC = () => {

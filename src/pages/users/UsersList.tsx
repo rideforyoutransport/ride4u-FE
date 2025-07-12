@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { Button, Card, CardHeader, CardContent } from '../../components/ui';
+import { Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, EmptyState, SearchInput } from '../../components/common';
 import { useUsers } from '../../hooks';
 import { ROUTES } from '../../utils/constants';

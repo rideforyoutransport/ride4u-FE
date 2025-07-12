@@ -1,5 +1,5 @@
 import { apiService } from './api';
-import { Trip, CreateTripData, QueryParams } from '../types';
+import { Trip, QueryParams } from '../types';
 
 export const tripsService = {
 

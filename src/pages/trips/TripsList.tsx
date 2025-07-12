@@ -5,7 +5,7 @@ import { Button, Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, EmptyState, SearchInput } from '../../components/common';
 import { useTrips } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
-import { formatDate, formatCurrency } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import type { Trip } from '../../types';
 import toast from 'react-hot-toast';
 
@@ -105,7 +105,6 @@ export const TripsList: React.FC = () => {
   // Filter trips on frontend for search functionality
   // Note: For production, you might want to implement search on backend as well
   const filteredTrips = trips.filter(trip =>
-    trip.tripDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.from?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.to?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );

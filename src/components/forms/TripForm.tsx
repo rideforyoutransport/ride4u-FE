@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -61,7 +61,6 @@ export const TripForm: React.FC<TripFormProps> = ({
   // Input states for location fields
   const [fromInput, setFromInput] = useState('');
   const [toInput, setToInput] = useState('');
-  const [stopInput, setStopInput] = useState('');
 
   const {
     control,
@@ -69,7 +68,6 @@ export const TripForm: React.FC<TripFormProps> = ({
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
     reset,
   } = useForm<TripFormData>({
     resolver: zodResolver(tripSchema),
@@ -930,7 +928,6 @@ export const TripForm: React.FC<TripFormProps> = ({
                   setStops([]);
                   setFromInput('');
                   setToInput('');
-                  setStopInput('');
                   setStopInputValue('');
                   setSelectedTrip({});
                   setAllPossibleFares([]);

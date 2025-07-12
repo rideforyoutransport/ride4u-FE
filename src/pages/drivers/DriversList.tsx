@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, EmptyState, SearchInput } from '../../components/common';
 import { useDrivers } from '../../hooks';

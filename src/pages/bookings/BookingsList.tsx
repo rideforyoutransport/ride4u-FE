@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Download } from 'lucide-react';
-import { Button, Card, CardHeader, CardContent } from '../../components/ui';
+import { Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, SearchInput } from '../../components/common';
 import { useBookings } from '../../hooks';
 import { formatDate, formatCurrency } from '../../utils/formatters';
@@ -15,78 +14,93 @@ export const BookingsList: React.FC = () => {
     {
       key: 'route',
       header: 'Route',
-      render: (booking: any) => 
-        `${booking.from?.name || 'N/A'} → ${booking.to?.name || 'N/A'}`,
+      render: (booking: Booking) => {
+        const getCityName = (fullName: string) => fullName.split(',')[0].trim();
+        const fromName = booking.from?.name ? getCityName(booking.from.name) : 'N/A';
+        const toName = booking.to?.name ? getCityName(booking.to.name) : 'N/A';
+        return `${fromName} → ${toName}`;
+      },
     },
     {
       key: 'tripDate',
       header: 'Trip Date',
-      render: (booking: any) => formatDate(booking.bookingDate),
+      render: (booking: Booking) => formatDate(booking.bookingDate),
     },
     {
       key: 'luggageOpted',
       header: 'Luggage Type',
-      render: (booking: any) => String(booking.luggageTypeOpted).toUpperCase(),
+      render: (booking: Booking) => String(booking.luggageTypeOpted).toUpperCase(),
     },
     {
       key: 'refreshmentsOpted',
       header: 'Refreshments Opted?',
-      render: (booking: any) => booking.refreshmentsOpted? "Yes": "No",
+      render: (booking: Booking) => booking.refreshmentsOpted? "Yes": "No",
     },
     {
       key: 'vehicle',
       header: 'Vehicle',
-      render: (booking: any) => booking.vehicle?.name || 'N/A',
+      render: (booking: Booking) => booking.vehicle?.name || 'N/A',
     },
     {
       key: 'totalSeatsBooked',
       header: 'Seats',
-      render: (booking: any) => booking.totalSeatsBooked,
+      render: (booking: Booking) => booking.totalSeatsBooked,
     },
     {
       key: 'totalAmount',
       header: 'Total Amount',
-      render: (booking: any) => formatCurrency(booking.totalAmount || 0),
+      render: (booking: Booking) => formatCurrency(booking.totalAmount || 0),
     },
     {
       key: 'amountPaid',
       header: 'Paid',
-      render: (booking: any) => formatCurrency(booking.amountPaid || 0),
+      render: (booking: Booking) => formatCurrency(booking.amountPaid || 0),
     },
     {
       key: 'amountLeft',
       header: 'Balance',
-      render: (booking: any) => formatCurrency(booking.amountLeft || 0),
+      render: (booking: Booking) => formatCurrency(booking.amountLeft || 0),
     },
     {
       key: 'rating',
       header: 'Rating',
-      render: (booking: any) => booking.rating ? `${booking.rating}/5` : 'No rating',
+      render: (booking: Booking) => booking.rating ? `${booking.rating}/5` : '--',
     },
     {
       key: 'review',
       header: 'Review',
-      render: (booking: any) => booking.review,
+      className: 'max-w-xs', // Limit width for review column
+      render: (booking: Booking) => {
+        if (!booking.review) return '--';
+        
+        return (
+          <div className="max-w-xs">
+            <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+              {booking.review}
+            </p>
+          </div>
+        );
+      },
     },
     {
       key: 'paymentId',
       header: 'Payment ID',
-      render: (booking: any) => booking.paymentID,
+      render: (booking: Booking) => booking.paymentID ? booking.paymentID : '--',
     },
     {
       key: 'tip',
       header: 'Tip',
-      render: (booking: any) => booking.tipAmount,
+      render: (booking: Booking) => booking.tipAmount,
     },
     {
       key: 'tipId',
       header: 'Tip Payment ID',
-      render: (booking: any) => booking.tipPaymentId,
+      render: (booking: Booking) => booking.tipPaymentID,
     },
     {
       key: 'bookingDate',
       header: 'Booking Date',
-      render: (booking: any) => formatDate(booking.created),
+      render: (booking: Booking) => formatDate(booking.created),
     },
   ];
 
