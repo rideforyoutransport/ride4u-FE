@@ -3,19 +3,44 @@ import { tripsService } from '../services';
 import type { Trip } from '../types';
 import toast from 'react-hot-toast';
 
-export const useTrips = () => {
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface PaginationParams {
+  page: number;
+  limit: number;
+}
 
-  const fetchTrips = useCallback(async () => {
+interface TripsState {
+  trips: Trip[];
+  loading: boolean;
+  error: string | null;
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  limit: number;
+}
+
+export const useTrips = () => {
+  const [state, setState] = useState<TripsState>({
+    trips: [],
+    loading: false,
+    error: null,
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0,
+    limit: 20,
+  });
+
+  const fetchTrips = useCallback(async (params?: PaginationParams) => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await tripsService.getAll();
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const page = params?.page || state.currentPage;
+      const limit = params?.limit || state.limit;
+      
+      const response = await tripsService.getAll({ page, limit });
+      
       if (response.success) {
         // Process trips to add name property like in original code
-        const processedTrips = (Array.isArray(response.result) ? response.result : []).map((trip: any) => {
+        const processedTrips = (Array.isArray(response.result.items) ? response.result.items : []).map((trip: any) => {
           let tripName = '';
           if (trip.returnTrip) {
             tripName = `${trip.from?.name || 'Unknown'} - ${trip.to?.name || 'Unknown'} - ${trip.from?.name || 'Unknown'}`;
@@ -27,19 +52,39 @@ export const useTrips = () => {
             name: tripName
           };
         });
-        setTrips(processedTrips);
+        
+        const totalCount = response.result.total || processedTrips.length;
+        const totalPages = Math.ceil(totalCount / limit);
+        
+        setState(prev => ({
+          ...prev,
+          trips: processedTrips,
+          totalCount,
+          currentPage: page,
+          totalPages,
+          limit,
+        }));
       } else {
-        setTrips([]);
+        setState(prev => ({ ...prev, trips: [], totalCount: 0, totalPages: 0 }));
       }
     } catch (err: any) {
       console.error('Error fetching trips:', err);
-      setError(err.message);
-      setTrips([]);
+      setState(prev => ({ ...prev, error: err.message, trips: [], totalCount: 0, totalPages: 0 }));
       toast.error('Failed to fetch trips');
     } finally {
-      setLoading(false);
+      setState(prev => ({ ...prev, loading: false }));
     }
-  }, []);
+  }, [state.currentPage, state.limit]);
+
+  const changePage = useCallback((page: number) => {
+    if (page >= 1 && page <= state.totalPages) {
+      fetchTrips({ page, limit: state.limit });
+    }
+  }, [fetchTrips, state.totalPages, state.limit]);
+
+  const changeLimit = useCallback((limit: number) => {
+    fetchTrips({ page: 1, limit }); // Reset to first page when changing limit
+  }, [fetchTrips]);
 
   const getTrip = useCallback(async (id: string): Promise<any | null> => {
     try {
@@ -57,11 +102,11 @@ export const useTrips = () => {
 
   const createTrip = useCallback(async (data: any) => {
     try {
-      setLoading(true);
+      setState(prev => ({ ...prev, loading: true }));
       const response = await tripsService.create(data);
       if (response.success) {
         toast.success('Trip created successfully');
-        await fetchTrips(); // Refresh the list
+        await fetchTrips({ page: 1, limit: state.limit }); // Refresh from first page
         return response.result;
       } else {
         throw new Error('Failed to create trip');
@@ -71,17 +116,17 @@ export const useTrips = () => {
       toast.error('Failed to create trip');
       throw err;
     } finally {
-      setLoading(false);
+      setState(prev => ({ ...prev, loading: false }));
     }
-  }, [fetchTrips]);
+  }, [fetchTrips, state.limit]);
 
   const updateTrip = useCallback(async (id: string, data: any) => {
     try {
-      setLoading(true);
+      setState(prev => ({ ...prev, loading: true }));
       const response = await tripsService.update(id, data);
       if (response.success) {
         toast.success('Trip updated successfully');
-        await fetchTrips(); // Refresh the list
+        await fetchTrips({ page: state.currentPage, limit: state.limit }); // Refresh current page
         return response.result;
       } else {
         throw new Error('Failed to update trip');
@@ -91,16 +136,22 @@ export const useTrips = () => {
       toast.error('Failed to update trip');
       throw err;
     } finally {
-      setLoading(false);
+      setState(prev => ({ ...prev, loading: false }));
     }
-  }, [fetchTrips]);
+  }, [fetchTrips, state.currentPage, state.limit]);
 
   const deleteTrip = useCallback(async (id: string) => {
     try {
       const response = await tripsService.delete(id);
       if (response.success) {
         toast.success('Trip deleted successfully');
-        await fetchTrips(); // Refresh the list
+        
+        // Check if we need to go back a page after deletion
+        const newTotalCount = state.totalCount - 1;
+        const newTotalPages = Math.ceil(newTotalCount / state.limit);
+        const targetPage = state.currentPage > newTotalPages ? Math.max(1, newTotalPages) : state.currentPage;
+        
+        await fetchTrips({ page: targetPage, limit: state.limit });
       } else {
         throw new Error('Failed to delete trip');
       }
@@ -108,14 +159,20 @@ export const useTrips = () => {
       console.error('Error deleting trip:', err);
       toast.error('Failed to delete trip');
     }
-  }, [fetchTrips]);
+  }, [fetchTrips, state.currentPage, state.limit, state.totalCount]);
 
   const deleteMultipleTrips = useCallback(async (ids: string[]) => {
     try {
       const response = await tripsService.deleteMultiple(ids);
       if (response.success) {
         toast.success(`${ids.length} trip(s) deleted successfully`);
-        await fetchTrips(); // Refresh the list
+        
+        // Check if we need to go back a page after deletion
+        const newTotalCount = state.totalCount - ids.length;
+        const newTotalPages = Math.ceil(newTotalCount / state.limit);
+        const targetPage = state.currentPage > newTotalPages ? Math.max(1, newTotalPages) : state.currentPage;
+        
+        await fetchTrips({ page: targetPage, limit: state.limit });
       } else {
         throw new Error('Failed to delete trips');
       }
@@ -123,17 +180,28 @@ export const useTrips = () => {
       console.error('Error deleting trips:', err);
       toast.error('Failed to delete trips');
     }
-  }, [fetchTrips]);
+  }, [fetchTrips, state.currentPage, state.limit, state.totalCount]);
 
   useEffect(() => {
     fetchTrips();
-  }, [fetchTrips]);
+  }, []); // Only run on mount
 
   return {
-    trips,
-    loading,
-    error,
+    // Data
+    trips: state.trips,
+    loading: state.loading,
+    error: state.error,
+    
+    // Pagination info
+    currentPage: state.currentPage,
+    totalPages: state.totalPages,
+    totalCount: state.totalCount,
+    limit: state.limit,
+    
+    // Actions
     fetchTrips,
+    changePage,
+    changeLimit,
     getTrip,
     createTrip,
     updateTrip,

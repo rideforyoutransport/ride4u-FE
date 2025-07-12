@@ -11,6 +11,13 @@ interface Column<T> {
   className?: string;
 }
 
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+}
+
 interface DataTableProps<T> {
   title: string;
   data: T[];
@@ -23,6 +30,12 @@ interface DataTableProps<T> {
   selectable?: boolean;
   getItemId?: (item: T) => string;
   emptyMessage?: string;
+  
+  // Backend pagination props
+  pagination?: PaginationInfo;
+  onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
+  pageSizeOptions?: number[];
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -37,15 +50,44 @@ export function DataTable<T extends Record<string, any>>({
   selectable = false,
   getItemId = (item) => item.id,
   emptyMessage,
+  pagination,
+  onPageChange,
+  onLimitChange,
+  pageSizeOptions = [10, 20, 50, 100],
 }: DataTableProps<T>) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = data.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // Use backend pagination if provided, otherwise fall back to frontend pagination
+  const isBackendPagination = !!(pagination && onPageChange);
+  
+  // Frontend pagination (fallback)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  
+  let paginatedData = data;
+  let totalPages = 1;
+  let startIndex = 0;
+  let endIndex = data.length;
+  let totalCount = data.length;
+  let pageLimit = itemsPerPage;
+  let activePage = currentPage;
+
+  if (isBackendPagination && pagination) {
+    // Backend pagination
+    paginatedData = data; // Data is already paginated from backend
+    totalPages = pagination.totalPages;
+    startIndex = (pagination.currentPage - 1) * pagination.limit;
+    endIndex = Math.min(startIndex + pagination.limit, pagination.totalCount);
+    totalCount = pagination.totalCount;
+    pageLimit = pagination.limit;
+    activePage = pagination.currentPage;
+  } else {
+    // Frontend pagination
+    startIndex = (currentPage - 1) * itemsPerPage;
+    endIndex = startIndex + itemsPerPage;
+    paginatedData = data.slice(startIndex, endIndex);
+    totalPages = Math.ceil(data.length / itemsPerPage);
+  }
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -64,6 +106,22 @@ export function DataTable<T extends Record<string, any>>({
       newSelected.delete(id);
     }
     setSelectedItems(newSelected);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (isBackendPagination && onPageChange) {
+      onPageChange(page);
+    } else {
+      setCurrentPage(page);
+    }
+    setSelectedItems(new Set()); // Clear selections when changing page
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    if (isBackendPagination && onLimitChange) {
+      onLimitChange(newLimit);
+    }
+    setSelectedItems(new Set()); // Clear selections when changing limit
   };
 
   const enhancedColumns: Column<T>[] = selectable
@@ -231,28 +289,76 @@ export function DataTable<T extends Record<string, any>>({
         {totalPages > 1 && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center text-sm text-gray-700">
-                Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} results
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-700">
+                  Showing {startIndex + 1} to {endIndex} of {totalCount} results
+                </div>
+                
+                {/* Page size selector */}
+                {isBackendPagination && onLimitChange && (
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm text-gray-700">Show:</label>
+                    <select
+                      value={pageLimit}
+                      onChange={(e) => handleLimitChange(Number(e.target.value))}
+                      className="border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      {pageSizeOptions.map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
+              
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
                   icon={ChevronLeft}
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(Math.max(1, activePage - 1))}
+                  disabled={activePage === 1}
                 >
                   Previous
                 </Button>
-                <span className="text-sm text-gray-700">
-                  Page {currentPage} of {totalPages}
-                </span>
+                
+                {/* Page numbers */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum: number;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (activePage <= 3) {
+                      pageNum = i + 1;
+                    } else if (activePage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = activePage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={cn(
+                          'px-3 py-1 text-sm rounded-md',
+                          pageNum === activePage
+                            ? 'bg-primary-600 text-white'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
                 <Button
                   variant="outline"
                   size="sm"
                   icon={ChevronRight}
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(Math.min(totalPages, activePage + 1))}
+                  disabled={activePage === totalPages}
                 >
                   Next
                 </Button>

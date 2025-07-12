@@ -3,7 +3,7 @@ import { Booking, QueryParams } from '../types';
 
 let data = {
   "from": 0,
-  "to": 5,
+  "to": 50,
   "expandKeys": {
     "from": [],
     "to": [],

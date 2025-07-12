@@ -11,7 +11,17 @@ import toast from 'react-hot-toast';
 
 export const TripsList: React.FC = () => {
   const navigate = useNavigate();
-  const { trips, loading, deleteTrip } = useTrips();
+  const { 
+    trips, 
+    loading, 
+    deleteTrip,
+    currentPage,
+    totalPages,
+    totalCount,
+    limit,
+    changePage,
+    changeLimit
+  } = useTrips();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleShareTrip = async (trip: Trip) => {
@@ -28,19 +38,14 @@ export const TripsList: React.FC = () => {
 
   const columns = [
     {
-      key: 'from' as keyof Trip,
-      header: 'From',
-      render: (trip: Trip) => trip.from?.name || 'N/A',
-    },
-    {
-      key: 'to' as keyof Trip,
-      header: 'To',
-      render: (trip: Trip) => trip.to?.name || 'N/A',
-    },
-    {
-      key: 'tripDescription' as keyof Trip,
-      header: 'Description',
-      render: (trip: Trip) => trip.tripDescription || 'No description',
+      key: 'route' as keyof Trip,
+      header: 'Route',
+      render: (trip: Trip) => {
+        const getCityName = (fullName: string) => fullName.split(',')[0].trim();
+        const fromName = trip.from?.name ? getCityName(trip.from.name) : 'N/A';
+        const toName = trip.to?.name ? getCityName(trip.to.name) : 'N/A';
+        return `${fromName} → ${toName}`;
+      },
     },
     {
       key: 'tripDate' as keyof Trip,
@@ -48,49 +53,14 @@ export const TripsList: React.FC = () => {
       render: (trip: Trip) => formatDate(trip.tripDate),
     },
     {
-      key: 'totalTripAmount' as keyof Trip,
-      header: 'Amount',
-      render: (trip: Trip) => formatCurrency(trip.totalTripAmount || 0),
-    },
-    {
-      key: 'vehicle' as keyof Trip,
-      header: 'Vehicle',
-      render: (trip: Trip) => trip.vehicle?.name || 'N/A',
-    },
-    {
       key: 'driver' as keyof Trip,
       header: 'Driver',
       render: (trip: Trip) => trip.driver?.name || 'N/A',
     },
     {
-      key: 'bookingAmount' as keyof Trip,
-      header: 'Booking Amount',
-      render: (trip: Trip) => formatCurrency(trip.bookingMinimumAmount || 0),
-    },
-    {
-      key: 'seats' as keyof Trip,
-      header: 'Seats',
-      render: (trip: Trip) => trip.totalSeats,
-    },
-    {
-      key: 'luggage' as keyof Trip,
-      header: 'Luggage',
-      render: (trip: Trip) => trip.luggage,
-    },
-    {
-      key: 'refreshments' as keyof Trip,
-      header: 'Refreshments Available',
-      render: (trip: Trip) => trip.refreshments?"Yes": "No",
-    },
-    {
-      key: 'stops' as keyof Trip,
-      header: 'Stops',
-      render: (trip: Trip) => trip.stops.map(stop => stop.name).join(', '),
-    },
-    {
       key: 'returnTrip' as keyof Trip,
       header: 'Is Return Trip?',
-      render: (trip: Trip) => trip.returnTrip != null ? "No" : "Yes",
+      render: (trip: Trip) => trip.returnTrip != null ? "Yes" : "No",
     },
     {
       key: 'createdAt' as keyof Trip,
@@ -132,11 +102,20 @@ export const TripsList: React.FC = () => {
     },
   ];
 
+  // Filter trips on frontend for search functionality
+  // Note: For production, you might want to implement search on backend as well
   const filteredTrips = trips.filter(trip =>
     trip.tripDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.from?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.to?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const paginationInfo = {
+    currentPage,
+    totalPages,
+    totalCount,
+    limit,
+  };
 
   return (
     <div className="space-y-6">
@@ -180,6 +159,10 @@ export const TripsList: React.FC = () => {
               data={filteredTrips}
               columns={columns}
               loading={loading}
+              pagination={paginationInfo}
+              onPageChange={changePage}
+              onLimitChange={changeLimit}
+              pageSizeOptions={[10, 20, 50, 100]}
             />
           )}
         </CardContent>
