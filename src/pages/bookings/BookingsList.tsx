@@ -34,7 +34,7 @@ export const BookingsList: React.FC = () => {
     {
       key: 'refreshmentsOpted',
       header: 'Refreshments Opted?',
-      render: (booking: Booking) => booking.refreshmentsOpted? "Yes": "No",
+      render: (booking: Booking) => booking.refreshmentsOpted ? "Yes" : "No",
     },
     {
       key: 'vehicle',
@@ -69,15 +69,33 @@ export const BookingsList: React.FC = () => {
     {
       key: 'review',
       header: 'Review',
-      className: 'max-w-xs', // Limit width for review column
+      className: 'max-w-xs',
       render: (booking: Booking) => {
         if (!booking.review) return '--';
-        
+
+        // Function to truncate text to 20 words
+        const truncateToWords = (text: string, wordLimit: number = 20) => {
+          if (text.length <= wordLimit) return text;
+          return text.slice(0, wordLimit) + '...';
+        };
+
+        const truncatedReview = truncateToWords(booking.review, 20);
+        const isLongReview = booking.review.length > 20;
+
         return (
-          <div className="max-w-xs">
-            <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
-              {booking.review}
+          <div className="max-w-xs relative group">
+            <p className="text-sm text-gray-900 cursor-pointer">
+              {truncatedReview}
             </p>
+
+            {/* Tooltip that shows on the right side */}
+            {isLongReview && (
+              <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-[9999] bg-gray-800 text-white text-sm rounded-lg p-4 shadow-xl w-max max-w-lg whitespace-pre-wrap border border-gray-600">
+                {booking.review}
+                {/* Arrow pointing left */}
+                <div className="absolute right-full top-4 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+              </div>
+            )}
           </div>
         );
       },

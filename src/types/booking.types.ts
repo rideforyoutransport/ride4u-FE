@@ -13,6 +13,11 @@ export interface Booking {
   vehicle: {
     name: string;
   };
+  user: {
+    name: string;
+    mobile: string;
+  };
+  status: string;
   totalSeatsBooked: number;
   amountPaid: number;
   amountLeft: number;

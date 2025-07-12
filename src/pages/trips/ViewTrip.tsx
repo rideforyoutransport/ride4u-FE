@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Edit, MapPin, Calendar, Car, User } from 'lucide-react';
+import { ArrowLeft, Edit, MapPin, Calendar, Car, User, Users, Eye } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent, Badge } from '../../components/ui';
-import { useTrips } from '../../hooks';
+import { DataTable } from '../../components/common';
+import { useTrips, useBookings } from '../../hooks';
 import { ROUTES } from '../../utils/constants';
+import { formatDate, formatCurrency } from '../../utils/formatters';
+import type { Booking } from '../../types';
 import dayjs from 'dayjs';
 
 export const ViewTrip: React.FC = () => {
@@ -12,6 +15,14 @@ export const ViewTrip: React.FC = () => {
   const location = useLocation();
   const { state } = location;
   const { getTrip } = useTrips();
+  const { 
+    tripBookings, 
+    tripBookingsLoading, 
+    tripBookingsError, 
+    tripBookingsCount,
+    fetchBookingsByTrip,
+    clearTripBookings 
+  } = useBookings();
 
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +46,18 @@ export const ViewTrip: React.FC = () => {
     };
     loadTrip();
   }, [id, state, getTrip]);
+
+  // Fetch bookings when trip ID is available
+  useEffect(() => {
+    if (id) {
+      fetchBookingsByTrip(id);
+    }
+    
+    // Cleanup: clear trip bookings when component unmounts
+    return () => {
+      clearTripBookings();
+    };
+  }, [id, fetchBookingsByTrip, clearTripBookings]);
 
   if (loading) {
     return (
@@ -63,6 +86,85 @@ export const ViewTrip: React.FC = () => {
     if (!dateString) return 'N/A';
     return dayjs(dateString).format('MMMM D, YYYY [at] h:mm A');
   };
+
+  // Bookings table columns
+  const bookingsColumns = [
+    {
+      key: 'route',
+      header: 'Route',
+      render: (booking: Booking) => {
+        const getCityName = (fullName: string) => fullName.split(',')[0].trim();
+        const fromName = booking.from?.name ? getCityName(booking.from.name) : 'N/A';
+        const toName = booking.to?.name ? getCityName(booking.to.name) : 'N/A';
+        return `${fromName} → ${toName}`;
+      },
+    },
+    {
+      key: 'totalSeatsBooked',
+      header: 'Seats',
+      render: (booking: Booking) => booking.totalSeatsBooked,
+    },
+    {
+      key: 'user',
+      header: 'User',
+      render: (booking: Booking) => booking.user.name,
+    },
+    {
+      key: 'mobile',
+      header: 'Mobile',
+      render: (booking: Booking) => booking.user.mobile,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (booking: Booking) => {
+        const isBooked = booking.status == "1";
+        const statusText = isBooked ? "Booked" : "Cancelled";
+        const colorClass = isBooked ? "text-green-600 font-semibold" : "text-red-600 font-semibold";
+        
+        return (
+          <span className={colorClass}>
+            {statusText}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'totalAmount',
+      header: 'Total Amount',
+      render: (booking: Booking) => formatCurrency(booking.totalAmount || 0),
+    },
+    {
+      key: 'amountPaid',
+      header: 'Paid',
+      render: (booking: Booking) => formatCurrency(booking.amountPaid || 0),
+    },
+    {
+      key: 'amountLeft',
+      header: 'Balance',
+      render: (booking: Booking) => formatCurrency(booking.amountLeft || 0),
+    },
+    {
+      key: 'luggageTypeOpted',
+      header: 'Luggage',
+      render: (booking: Booking) => String(booking.luggageTypeOpted).toUpperCase(),
+    },
+    {
+      key: 'refreshmentsOpted',
+      header: 'Refreshments',
+      render: (booking: Booking) => booking.refreshmentsOpted ? 'Yes' : 'No',
+    },
+    {
+      key: 'rating',
+      header: 'Rating',
+      render: (booking: Booking) => booking.rating ? `${booking.rating}/5` : 'No rating',
+    },
+    {
+      key: 'created',
+      header: 'Booking Date',
+      render: (booking: Booking) => formatDate(booking.created),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -194,6 +296,44 @@ export const ViewTrip: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Trip Bookings Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Trip Bookings ({tripBookingsCount})
+            </h2>
+            {tripBookingsError && (
+              <div className="text-sm text-red-600">
+                Error: {tripBookingsError}
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {tripBookingsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-gray-600">Loading bookings...</span>
+            </div>
+          ) : tripBookings.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No bookings found for this trip</p>
+            </div>
+          ) : (
+            <DataTable
+              title=""
+              data={tripBookings}
+              columns={bookingsColumns}
+              loading={tripBookingsLoading}
+              emptyMessage="No bookings found for this trip"
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Fare Structure */}
       {trip.fares?.fares && trip.fares.fares.length > 0 && (
