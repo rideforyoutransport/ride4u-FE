@@ -86,66 +86,75 @@ export const TripForm: React.FC<TripFormProps> = ({
   const watchReturnTrip = watch('returnTrip');
 
   // Copy values from previous trip function
-  const setValues = (trip: any, vehicles: any[], drivers: any[], vendors: any[]) => {
-    console.log('Copying values from trip:', trip);
+const setValues = (trip: any, vehicles: any[], drivers: any[], vendors: any[]) => {
+  console.log('Copying values from trip:', trip);
 
-    // Set form values
-    reset({
-      tripDescription: trip.tripDescription || '',
-      tripDate: setDateAuto? trip.tripDate: '',
-      vehicle: trip.vehicle?.id || '',
-      driver: trip.driver?.id || '',
-      luggage: trip.luggage || [],
-      refreshments: trip.refreshments || false,
-      bookingAmount: trip.bookingAmount || trip.bookingMinimumAmount || 1,
-      returnTrip: !!trip.returnTrip,
-      returnTripDate: setDateAuto? trip.returnTrip.tripDate: '',
-    });
+  // Add comprehensive null checks
+  if (!trip) {
+    console.warn('Trip data is null, skipping setValues');
+    return;
+  }
 
-    // Set locations for main trip
-    if (trip.from) {
-      const fromData = {
-        ...trip.from,
-        lat: trip.from.geoLocation?.lat || trip.from.lat,
-        lng: trip.from.geoLocation?.lng || trip.from.lng,
-        place_name: trip.from.name,
-        place_id: trip.from.place_id || trip.from.id,
-      };
-      setFrom(fromData);
-      setFromInput(fromData.place_name || fromData.name || '');
-    }
+  // Set form values with safe property access
+  reset({
+    tripDescription: trip.tripDescription || '',
+    tripDate: setDateAuto ? (trip.tripDate || '') : '',
+    vehicle: trip.vehicle?.id || '',
+    driver: trip.driver?.id || '',
+    luggage: trip.luggage || [],
+    refreshments: trip.refreshments || false,
+    bookingAmount: trip.bookingAmount || trip.bookingMinimumAmount || 1,
+    returnTrip: !!trip.returnTrip,
+    // Fix: Add null check for returnTrip before accessing tripDate
+    returnTripDate: setDateAuto ? (trip.returnTrip?.tripDate || '') : '',
+  });
 
-    if (trip.to) {
-      const toData = {
-        ...trip.to,
-        lat: trip.to.geoLocation?.lat || trip.to.lat,
-        lng: trip.to.geoLocation?.lng || trip.to.lng,
-        place_name: trip.to.name,
-        place_id: trip.to.place_id || trip.to.id,
-      };
-      setTo(toData);
-      setToInput(toData.place_name || toData.name || '');
-    }
+  // Set locations for main trip with null checks
+  if (trip.from) {
+    const fromData = {
+      ...trip.from,
+      lat: trip.from.geoLocation?.lat || trip.from.lat,
+      lng: trip.from.geoLocation?.lng || trip.from.lng,
+      place_name: trip.from.name,
+      place_id: trip.from.place_id || trip.from.id,
+    };
+    setFrom(fromData);
+    setFromInput(fromData.place_name || fromData.name || '');
+  }
 
-    // Set stops
-    if (trip.stops) {
-      const stopsData = trip.stops.map((stop: any) => ({
-        ...stop,
-        lat: stop.geoLocation?.lat || stop.lat,
-        lng: stop.geoLocation?.lng || stop.lng,
-        place_name: stop.name,
-        place_id: stop.place_id || stop.id,
-      }));
-      setStops(stopsData);
-    }
+  if (trip.to) {
+    const toData = {
+      ...trip.to,
+      lat: trip.to.geoLocation?.lat || trip.to.lat,
+      lng: trip.to.geoLocation?.lng || trip.to.lng,
+      place_name: trip.to.name,
+      place_id: trip.to.place_id || trip.to.id,
+    };
+    setTo(toData);
+    setToInput(toData.place_name || toData.name || '');
+  }
 
-    // Set fares
-    if (trip.fares?.fares) {
-      setAllPossibleFares([...trip.fares.fares]);
-    }
+  // Set stops with null check
+  if (trip.stops && Array.isArray(trip.stops)) {
+    const stopsData = trip.stops.map((stop: any) => ({
+      ...stop,
+      lat: stop.geoLocation?.lat || stop.lat,
+      lng: stop.geoLocation?.lng || stop.lng,
+      place_name: stop.name,
+      place_id: stop.place_id || stop.id,
+    }));
+    setStops(stopsData);
+  }
 
-    // Set return trip data if exists
-    if (trip.returnTrip) {
+  // Set fares with null checks
+  if (trip.fares?.fares && Array.isArray(trip.fares.fares)) {
+    setAllPossibleFares([...trip.fares.fares]);
+  }
+
+  // Set return trip data if exists - with comprehensive null checks
+  if (trip.returnTrip && typeof trip.returnTrip === 'object') {
+    // Check if returnTrip.from exists
+    if (trip.returnTrip.from) {
       const returnFromData = {
         ...trip.returnTrip.from,
         lat: trip.returnTrip.from.geoLocation?.lat,
@@ -154,7 +163,10 @@ export const TripForm: React.FC<TripFormProps> = ({
         place_id: trip.returnTrip.from.place_id || trip.returnTrip.from.id,
       };
       setFromReturn(returnFromData);
+    }
 
+    // Check if returnTrip.to exists
+    if (trip.returnTrip.to) {
       const returnToData = {
         ...trip.returnTrip.to,
         lat: trip.returnTrip.to.geoLocation?.lat,
@@ -163,22 +175,26 @@ export const TripForm: React.FC<TripFormProps> = ({
         place_id: trip.returnTrip.to.place_id || trip.returnTrip.to.id,
       };
       setToReturn(returnToData);
+    }
 
-      const returnStopsData = trip.returnTrip.stops?.map((stop: any) => ({
+    // Set return stops with null checks
+    if (trip.returnTrip.stops && Array.isArray(trip.returnTrip.stops)) {
+      const returnStopsData = trip.returnTrip.stops.map((stop: any) => ({
         ...stop,
         lat: stop.geoLocation?.lat,
         lng: stop.geoLocation?.lng,
         place_name: stop.name,
         place_id: stop.place_id || stop.id,
-      })) || [];
+      }));
       setStopsReturn(returnStopsData);
-
-      if (trip.returnTrip.fares?.fares) {
-        setAllPossibleFaresReturn([...trip.returnTrip.fares.fares]);
-      }
     }
-  };
 
+    // Set return fares with null checks
+    if (trip.returnTrip.fares?.fares && Array.isArray(trip.returnTrip.fares.fares)) {
+      setAllPossibleFaresReturn([...trip.returnTrip.fares.fares]);
+    }
+  }
+};
   // Handle trip selection for copying
   const handleTripSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
@@ -187,17 +203,19 @@ export const TripForm: React.FC<TripFormProps> = ({
       if (trip) {
         setSelectedTrip(trip);
         setValues(trip, vehicles, drivers, [vendor]);
+      } else {
+        console.warn('Selected trip not found');
       }
     }
   };
 
   // Load initial data
-  useEffect(() => {
-    if (initialData) {
-      console.log('Loading initial data:', initialData);
-      setValues(initialData, vehicles, drivers, [vendor]);
-    }
-  }, [initialData, reset]);
+useEffect(() => {
+  if (initialData) {
+    console.log('Loading initial data:', initialData);
+    setValues(initialData, vehicles, drivers, [vendor]);
+  }
+}, [initialData, reset]);
 
   // Generate fares when route changes (original logic)
   useEffect(() => {
@@ -207,18 +225,109 @@ export const TripForm: React.FC<TripFormProps> = ({
   }, [stops, from, to, isEdit]);
 
   // Set return stops when return trip is enabled
-  useEffect(() => {
-    if (watchReturnTrip && from.place_id && to.place_id) {
-      setStopsReturn([...stops].reverse());
-      setFromReturn(to);
-      setToReturn(from);
+  // useEffect(() => {
+  //   if (watchReturnTrip && from.place_id && to.place_id) {
+  //     setStopsReturn([...stops].reverse());
+  //     setFromReturn(to);
+  //     setToReturn(from);
 
-      // Generate return fares immediately
-      if (!isEdit) {
-        setTimeout(() => generateReturnFares(), 100);
-      }
+  //     // Generate return fares immediately
+  //     if (!isEdit) {
+  //       setTimeout(() => generateReturnFares(), 100);
+  //     }
+  //   }
+  // }, [watchReturnTrip, from, to, stops]);
+
+useEffect(() => {
+  console.log('🔄 Return trip toggle changed:', { 
+    watchReturnTrip, 
+    hasFrom: !!from.place_id, 
+    hasTo: !!to.place_id,
+    stopsCount: stops.length 
+  });
+
+  if (watchReturnTrip && from.place_id && to.place_id) {
+    // Set return trip data immediately
+    const reversedStops = [...stops].reverse();
+    
+    console.log('🚀 Setting return trip data:', {
+      fromReturn: to,
+      toReturn: from,
+      stopsReturn: reversedStops
+    });
+    
+    setStopsReturn(reversedStops);
+    setFromReturn(to);
+    setToReturn(from);
+
+    // Generate return fares in next tick to ensure state is updated
+    if (!isEdit) {
+      // Use a promise to ensure state updates are complete
+      Promise.resolve().then(() => {
+        setTimeout(() => {
+          console.log('🎯 Calling generateReturnFares with current state');
+          
+          // Call generateReturnFares with the updated values directly
+          generateReturnFaresWithValues(to, from, reversedStops);
+        }, 150);
+      });
     }
-  }, [watchReturnTrip, from, to, stops]);
+  } else if (!watchReturnTrip) {
+    console.log('❌ Clearing return trip data');
+    // Clear return trip data when disabled
+    setStopsReturn([]);
+    setFromReturn({});
+    setToReturn({});
+    setAllPossibleFaresReturn([]);
+  }
+}, [watchReturnTrip, from, to, stops, isEdit]);
+
+
+const generateReturnFaresWithValues = (fromRet: any, toRet: any, stopsRet: any[]) => {
+  console.log('🎯 generateReturnFaresWithValues called with:', {
+    fromRet,
+    toRet,
+    stopsRet
+  });
+
+  // Validate that we have the required data
+  if (!fromRet?.place_id || !toRet?.place_id) {
+    console.warn('⚠️ Missing return trip locations, skipping fare generation');
+    return;
+  }
+
+  let tempFareObj: any[] = [];
+  let stopsCurr = [fromRet, ...stopsRet, toRet];
+
+  console.log('📍 Return stops for fare calculation:', stopsCurr);
+
+  for (let index = 0; index < stopsCurr.length; index++) {
+    for (let j = index + 1; j < stopsCurr.length; j++) {
+      let element;
+      if (stopsCurr[index].place_id === fromRet.place_id && stopsCurr[j].place_id === toRet.place_id) {
+        element = {
+          from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+          to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+          fare: "1",
+          hidden: false,
+          master: true
+        };
+      } else {
+        element = {
+          from: { name: stopsCurr[index].place_name, place_id: stopsCurr[index].place_id },
+          to: { name: stopsCurr[j].place_name, place_id: stopsCurr[j].place_id },
+          fare: "0",
+          hidden: false,
+          master: false
+        };
+      }
+      tempFareObj.push(element);
+    }
+  }
+
+  console.log('💰 Generated return fares:', tempFareObj);
+  setAllPossibleFaresReturn(tempFareObj);
+};
 
   const generateFares = () => {
     let tempFareObj: any[] = [];
@@ -251,6 +360,13 @@ export const TripForm: React.FC<TripFormProps> = ({
   };
 
   const generateReturnFares = () => {
+
+    console.log('🎯 generateReturnFares called with:', {
+    fromReturn,
+    toReturn,
+    stopsReturn,
+    returnTripEnabled: watchReturnTrip
+  });
     let tempFareObj: any[] = [];
     let stopsCurr = [fromReturn, ...stopsReturn, toReturn];
 
@@ -602,7 +718,7 @@ export const TripForm: React.FC<TripFormProps> = ({
         </Card>
 
         {/* Vehicle & Driver Card */}
-        // Replace the Vehicle and Driver selection sections with this:
+        {/* // Replace the Vehicle and Driver selection sections with this: */}
 
         {/* Vehicle & Driver Card */}
         <Card className="shadow-lg border-0">

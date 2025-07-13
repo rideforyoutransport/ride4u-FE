@@ -3,32 +3,59 @@ import { Trip, QueryParams } from '../types';
 
 export const tripsService = {
 
-  async getAll(params?: QueryParams & { page?: number; limit?: number }) {
-    // Calculate from and to based on page and limit
-    const page = params?.page || 1;
-    const limit = params?.limit || 20;
-    const from = (page - 1) * limit;
-    const to = from + limit;
+  // async getAll(params?: QueryParams & { page?: number; limit?: number }) {
+  //   // Calculate from and to based on page and limit
+  //   const page = params?.page || 1;
+  //   const limit = params?.limit || 20;
+  //   const from = (page - 1) * limit;
+  //   const to = from + limit;
     
-    const getData = {
-      "from": from,
-      "to": to,
-      "expandKeys": {
-        "from": [
-          "name",
-        ],
-        "to": [
-          "name",
-        ],
-        "driver": ["name", "id", "number"],
-      }
-    };
+  //   const getData = {
+  //     "from": from,
+  //     "to": to,
+      
+  //     "expandKeys": {
+  //       "from": [
+  //         "name",
+  //       ],
+  //       "to": [
+  //         "name",
+  //       ],
+  //       "driver": ["name", "id", "number"],
+  //     }
+  //   };
 
-    const response = await apiService.post<{ items: Trip[]; total?: number }>('/trips/all', getData);
-    console.log(response);
-    return response;
-  },
+  //   const response = await apiService.post<{ items: Trip[]; total?: number }>('/trips/all', getData);
+  //   console.log(response);
+  //   return response;
+  // },
 
+async getAll(params?: QueryParams & { page?: number; limit?: number }) {
+  const page = params?.page || 1;
+  const limit = params?.limit || 20;
+  
+  // Calculate pagination correctly
+  const from = (page - 1) * limit;  // Page 1: 0, Page 2: 20, Page 3: 40
+  const to = from + limit;          // Page 1: 20, Page 2: 40, Page 3: 60
+  
+  const getData = {
+    "from": from,
+    "to": to,
+    "expandKeys": {
+      "from": ["name"],
+      "to": ["name"], 
+      "driver": ["name", "id", "number"],
+    }
+  };
+
+  // Add debugging to see what's actually being sent
+  console.log(`🔍 Pagination Debug - Page: ${page}, Limit: ${limit}, From: ${from}, To: ${to}`);
+  
+  const response = await apiService.post<{ items: Trip[]; total?: number }>('/trips/all', getData);
+  console.log(`📄 API Response:`, response);
+  
+  return response;
+},
 
   async getById(id: string) {
     // For getting single trip, we might need to use the same expandKeys

@@ -286,7 +286,7 @@ export function DataTable<T extends Record<string, any>>({
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+       {(totalPages > 1 || (isBackendPagination && onLimitChange)) && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
