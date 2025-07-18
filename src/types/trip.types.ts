@@ -47,6 +47,7 @@ export interface Trip {
   luggage: string[];
   refreshments: boolean;
   returnTrip?: ReturnTrip;
+  isReturnTrip: boolean;
   totalSeats: number;
   totalTripAmount: number;
   created: string;

@@ -4,7 +4,7 @@ import { Plus, Eye, Edit, Trash2, Share } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent } from '../../components/ui';
 import { DataTable, EmptyState, SearchInput } from '../../components/common';
 import { useTrips } from '../../hooks';
-import { ROUTES } from '../../utils/constants';
+import { DATE_FORMATS, ROUTES } from '../../utils/constants';
 import { formatDate } from '../../utils/formatters';
 import type { Trip } from '../../types';
 import toast from 'react-hot-toast';
@@ -50,7 +50,7 @@ export const TripsList: React.FC = () => {
     {
       key: 'tripDate' as keyof Trip,
       header: 'Date',
-      render: (trip: Trip) => formatDate(trip.tripDate),
+      render: (trip: Trip) => formatDate(trip.tripDate, DATE_FORMATS.DISPLAY_WITH_DAY),
     },
     {
       key: 'driver' as keyof Trip,
@@ -60,12 +60,7 @@ export const TripsList: React.FC = () => {
     {
       key: 'returnTrip' as keyof Trip,
       header: 'Is Return Trip?',
-      render: (trip: Trip) => trip.returnTrip != null ? "Yes" : "No",
-    },
-    {
-      key: 'createdAt' as keyof Trip,
-      header: 'Created At',
-      render: (trip: Trip) => formatDate(trip.created),
+      render: (trip: Trip) => trip.isReturnTrip? "Yes": "No",
     },
     {
       key: 'actions',
@@ -102,6 +97,7 @@ export const TripsList: React.FC = () => {
     },
   ];
 
+  console.log(trips);
   // Filter trips on frontend for search functionality
   // Note: For production, you might want to implement search on backend as well
   const filteredTrips = trips.filter(trip =>
