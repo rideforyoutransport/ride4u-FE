@@ -42,5 +42,5 @@ export const GOOGLE_MAPS_RESTRICTIONS = {
 export const DATE_FORMATS = {
   DISPLAY: 'MMM dd, yyyy HH:mm',
   API: "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
-  DISPLAY_WITH_DAY: "EEE, MMM dd, yyyy HH:mm"
+  DISPLAY_WITH_DAY: "EEE, MMM dd, yyyy hh:mm a"
 } as const;
