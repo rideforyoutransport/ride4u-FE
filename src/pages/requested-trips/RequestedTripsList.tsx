@@ -33,7 +33,7 @@ export const RequestedTripsList: React.FC = () => {
     {
       key: 'mobile',
       header: 'User Phone Number',
-      render: (trip: RequestedTrip) => trip.mobile || 'N/A',
+      render: (trip: RequestedTrip) => trip.mobile!= ""? trip.mobile : trip.requestingUser.phoneNumber,
     },
     {
       key: 'created' as keyof RequestedTrip,

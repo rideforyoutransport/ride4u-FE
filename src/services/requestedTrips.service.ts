@@ -5,7 +5,7 @@ let data = {
   "expandKeys": {
       "origin": [],
       "destination": [],
-      "requestingUser": []
+      "requestingUser": ["id", "name", "phoneNumber"]
   }
 }
 
